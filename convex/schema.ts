@@ -51,7 +51,8 @@ const schema = defineSchema({
     isPublicTeamMember: v.optional(v.boolean()),
     joinedAt: v.number(),
     isActive: v.boolean(),
-  }).index("by_team_category", ["teamCategory", "isPublicTeamMember"]),
+  }).index("by_team_category", ["teamCategory", "isPublicTeamMember"])
+    .index("by_email", ["email"]),
 
   organizationInfo: defineTable({
     key: v.string(), // "vision", "mission", "core_values", "history", "contact_info", etc.
