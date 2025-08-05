@@ -57,6 +57,7 @@ export const getHub = query({
 
 export const createHub = mutation({
   args: {
+    token: v.string(),
     name: v.string(),
     description: v.string(),
     objectives: v.string(),
@@ -65,7 +66,7 @@ export const createHub = mutation({
     termsOfReference: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
-    const permissions = await getPermissions(ctx);
+    const permissions = await getPermissions(ctx, args.token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }
@@ -89,6 +90,7 @@ export const createHub = mutation({
 export const updateHub = mutation({
   args: {
     hubId: v.id("hubs"),
+    token: v.string(),
     name: v.optional(v.string()),
     description: v.optional(v.string()),
     objectives: v.optional(v.string()),
@@ -96,8 +98,8 @@ export const updateHub = mutation({
     image: v.optional(v.id("_storage")),
     termsOfReference: v.optional(v.id("_storage")),
   },
-  handler: async (ctx, { hubId, ...updates }) => {
-    const permissions = await getPermissions(ctx);
+  handler: async (ctx, { hubId, token, ...updates }) => {
+    const permissions = await getPermissions(ctx, token);
     if (!permissions?.canManageHub(hubId)) {
       return { error: "Insufficient permissions" };
     }
@@ -162,10 +164,11 @@ export const reviewHubApplication = mutation({
     applicationId: v.id("hubMemberships"),
     status: v.union(v.literal("approved"), v.literal("rejected")),
     notes: v.optional(v.string()),
+    token: v.string()
   },
-  handler: async (ctx, { applicationId, status, notes }) => {
+  handler: async (ctx, { applicationId, status, notes, token }) => {
 
-    const permissions = await getPermissions(ctx);
+    const permissions = await getPermissions(ctx, token);
     if (!permissions) return { error: "Not authenticated" };
 
     const application = await ctx.db.get(applicationId);

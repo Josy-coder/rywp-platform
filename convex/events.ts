@@ -52,6 +52,7 @@ export const getEvents = query({
 export const createEvent = mutation({
   args: {
     title: v.string(),
+    token: v.string(),
     description: v.string(),
     type: v.union(v.literal("event"), v.literal("knowledge_session")),
     startDate: v.number(),
@@ -66,7 +67,7 @@ export const createEvent = mutation({
     hubId: v.optional(v.id("hubs")),
   },
   handler: async (ctx, args) => {
-    const permissions = await getPermissions(ctx);
+    const permissions = await getPermissions(ctx, args.token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }

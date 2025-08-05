@@ -82,9 +82,12 @@ export const unsubscribeFromNewsletter = mutation({
 });
 
 export const getNewsletterSubscribers = query({
-  args: { activeOnly: v.optional(v.boolean()) },
-  handler: async (ctx, { activeOnly = true }) => {
-    const permissions = await getPermissions(ctx);
+  args: {
+    activeOnly: v.optional(v.boolean()),
+    token: v.string(),
+  },
+  handler: async (ctx, { activeOnly = true, token}) => {
+    const permissions = await getPermissions(ctx, token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }

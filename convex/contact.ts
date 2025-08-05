@@ -13,9 +13,10 @@ export const getContactFormConfig = query({
 export const updateContactFormConfig = mutation({
   args: {
     formFields: v.array(v.any()),
+    token: v.string(),
   },
-  handler: async (ctx, { formFields }) => {
-    const permissions = await getPermissions(ctx);
+  handler: async (ctx, { formFields, token }) => {
+    const permissions = await getPermissions(ctx, token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }
@@ -78,9 +79,10 @@ export const submitContactForm = mutation({
 export const getContactSubmissions = query({
   args: {
     status: v.optional(v.union(v.literal("unread"), v.literal("read"), v.literal("replied"))),
+    token: v.string(),
   },
-  handler: async (ctx, { status }) => {
-    const permissions = await getPermissions(ctx);
+  handler: async (ctx, { status, token }) => {
+    const permissions = await getPermissions(ctx, token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }
@@ -113,9 +115,10 @@ export const updateContactSubmissionStatus = mutation({
     submissionId: v.id("contactSubmissions"),
     status: v.union(v.literal("read"), v.literal("replied")),
     notes: v.optional(v.string()),
+    token: v.string(),
   },
-  handler: async (ctx, { submissionId, status, notes }) => {
-    const permissions = await getPermissions(ctx);
+  handler: async (ctx, { submissionId, status, notes, token }) => {
+    const permissions = await getPermissions(ctx, token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }

@@ -20,7 +20,6 @@ import type * as crons from "../crons.js";
 import type * as emails from "../emails.js";
 import type * as events from "../events.js";
 import type * as files from "../files.js";
-import type * as http from "../http.js";
 import type * as hubs from "../hubs.js";
 import type * as media from "../media.js";
 import type * as membership from "../membership.js";
@@ -47,7 +46,6 @@ declare const fullApi: ApiFromModules<{
   emails: typeof emails;
   events: typeof events;
   files: typeof files;
-  http: typeof http;
   hubs: typeof hubs;
   media: typeof media;
   membership: typeof membership;

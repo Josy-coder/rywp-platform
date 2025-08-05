@@ -1,6 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { getPermissions } from "./auth";
+import { getPermissions, hashPassword } from "./auth";
 import { internal } from "./_generated/api";
 
 export const getMembershipFormConfig = query({
@@ -14,9 +14,10 @@ export const getMembershipFormConfig = query({
 export const updateMembershipFormConfig = mutation({
   args: {
     formFields: v.array(v.any()),
+    token: v.string(),
   },
-  handler: async (ctx, { formFields }) => {
-    const permissions = await getPermissions(ctx);
+  handler: async (ctx, { formFields, token }) => {
+    const permissions = await getPermissions(ctx, token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }
@@ -93,9 +94,10 @@ export const submitMembershipApplication = mutation({
 export const getMembershipApplications = query({
   args: {
     status: v.optional(v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected"))),
+    token: v.string(),
   },
-  handler: async (ctx, { status }) => {
-    const permissions = await getPermissions(ctx);
+  handler: async (ctx, { status, token}) => {
+    const permissions = await getPermissions(ctx, token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }
@@ -123,19 +125,21 @@ export const getMembershipApplications = query({
   },
 });
 
+
 export const reviewMembershipApplication = mutation({
   args: {
     applicationId: v.id("membershipApplications"),
     status: v.union(v.literal("approved"), v.literal("rejected")),
     notes: v.optional(v.string()),
+    token: v.string(), // Add token for auth
   },
-  handler: async (ctx, { applicationId, status, notes }) => {
-    const permissions = await getPermissions(ctx);
-    if (!permissions?.isGlobalAdmin()) {
-      return { error: "Insufficient permissions" };
-    }
-
+  handler: async (ctx, { applicationId, status, notes, token }) => {
     try {
+      const permissions = await getPermissions(ctx, token);
+      if (!permissions?.isGlobalAdmin()) {
+        return { error: "Insufficient permissions" };
+      }
+
       const application = await ctx.db.get(applicationId);
       if (!application) return { error: "Application not found" };
 
@@ -146,27 +150,35 @@ export const reviewMembershipApplication = mutation({
         reviewedAt: Date.now(),
       });
 
-      let tempPassword: string | null = null;
       if (status === "approved") {
+        // Generate temporary password
+        const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+        const { hash, salt } = await hashPassword(tempPassword);
+        const hashedPassword = `${hash}:${salt}`;
 
-        tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
-
+        // Create user account
         await ctx.db.insert("users", {
           name: application.applicantName,
           email: application.applicantEmail,
+          phone: undefined,
+          password: hashedPassword,
+          emailVerified: false,
           globalRole: "member",
           isActive: true,
           joinedAt: Date.now(),
+          failedLoginAttempts: 0,
         });
 
-        await ctx.scheduler.runAfter(0, internal.emails.sendWelcomeEmail,{
+        await ctx.scheduler.runAfter(0, internal.emails.sendWelcomeEmail, {
           to: application.applicantEmail,
           name: application.applicantName,
           temporaryPassword: tempPassword,
         });
+
+        return { success: true, message: "Application approved and welcome email sent with login credentials." };
       }
 
-      return { success: true, password: tempPassword };
+      return { success: true, message: "Application reviewed successfully." };
     } catch (error) {
       console.error("Failed to review application:", error);
       return { error: "Failed to review application" };

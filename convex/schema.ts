@@ -1,6 +1,5 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { authTables } from "@convex-dev/auth/server";
 
 const formFieldSchema = v.object({
   id: v.string(),
@@ -32,12 +31,12 @@ const formFieldSchema = v.object({
 });
 
 const schema = defineSchema({
-  ...authTables,
-
   users: defineTable({
     name: v.string(),
     email: v.string(),
-    emailVerified: v.optional(v.boolean()),
+    phone: v.optional(v.string()),
+    password: v.string(),
+    emailVerified: v.boolean(),
     globalRole: v.union(v.literal("member"), v.literal("admin"), v.literal("superadmin")),
     temporaryAdminUntil: v.optional(v.number()),
     profileImage: v.optional(v.id("_storage")),
@@ -51,8 +50,39 @@ const schema = defineSchema({
     isPublicTeamMember: v.optional(v.boolean()),
     joinedAt: v.number(),
     isActive: v.boolean(),
+    failedLoginAttempts: v.number(),
+    lockedUntil: v.optional(v.number()),
+    lastLoginAt: v.optional(v.number()),
   }).index("by_team_category", ["teamCategory", "isPublicTeamMember"])
     .index("by_email", ["email"]),
+
+  authSessions: defineTable({
+    userId: v.id("users"),
+    sessionToken: v.string(),
+    refreshToken: v.string(),
+    deviceInfo: v.optional(v.object({
+      userAgent: v.optional(v.string()),
+      ipAddress: v.optional(v.string()),
+      platform: v.optional(v.string()),
+    })),
+    expiresAt: v.number(),
+    refreshExpiresAt: v.number(),
+    lastUsedAt: v.number(),
+    createdAt: v.number(),
+  }).index("by_user", ["userId"])
+    .index("by_session_token", ["sessionToken"])
+    .index("by_refresh_token", ["refreshToken"])
+    .index("by_expires_at", ["expiresAt"]),
+
+  passwordResetTokens: defineTable({
+    userId: v.id("users"),
+    token: v.string(),
+    expiresAt: v.number(),
+    usedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  }).index("by_user", ["userId"])
+    .index("by_token", ["token"])
+    .index("by_expires_at", ["expiresAt"]),
 
   organizationInfo: defineTable({
     key: v.string(), // "vision", "mission", "core_values", "history", "contact_info", etc.

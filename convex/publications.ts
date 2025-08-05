@@ -102,6 +102,7 @@ export const getPublishedPublications = query({
 
 export const createPublication = mutation({
   args: {
+    token: v.string(),
     title: v.string(),
     content: v.string(),
     type: v.union(
@@ -117,7 +118,7 @@ export const createPublication = mutation({
     isRestrictedAccess: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const permissions = await getPermissions(ctx);
+    const permissions = await getPermissions(ctx, args.token);
     if (!permissions) return { error: "Not authenticated" };
 
     const canCreate = permissions.user.globalRole === "member" ?
@@ -153,11 +154,12 @@ export const createPublication = mutation({
 
 export const reviewPublication = mutation({
   args: {
+    token: v.string(),
     publicationId: v.id("publications"),
     status: v.union(v.literal("published"), v.literal("rejected")),
   },
-  handler: async (ctx, { publicationId, status }) => {
-    const permissions = await getPermissions(ctx);
+  handler: async (ctx, { publicationId, status, token }) => {
+    const permissions = await getPermissions(ctx, token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }
@@ -222,12 +224,13 @@ export const requestPublicationAccess = mutation({
 
 export const reviewPublicationAccessRequest = mutation({
   args: {
+    token: v.string(),
     requestId: v.id("publicationAccessRequests"),
     status: v.union(v.literal("approved"), v.literal("denied")),
     reason: v.optional(v.string()),
   },
-  handler: async (ctx, { requestId, status, reason }) => {
-    const permissions = await getPermissions(ctx);
+  handler: async (ctx, { requestId, status, reason, token }) => {
+    const permissions = await getPermissions(ctx, token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }

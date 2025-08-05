@@ -35,12 +35,13 @@ export const getAllOrganizationInfo = query({
 
 export const updateOrganizationInfo = mutation({
   args: {
+    token: v.string(),
     key: v.string(),
     content: v.string(),
     type: v.union(v.literal("text"), v.literal("html"), v.literal("json")),
   },
-  handler: async (ctx, { key, content, type }) => {
-    const permissions = await getPermissions(ctx);
+  handler: async (ctx, { key, content, type, token }) => {
+    const permissions = await getPermissions(ctx, token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }

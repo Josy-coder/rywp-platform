@@ -60,9 +60,10 @@ export const createCareerOpportunity = mutation({
     contactEmail: v.string(),
     applicationLink: v.optional(v.string()),
     attachments: v.optional(v.array(v.id("_storage"))),
+    token: v.string(),
   },
   handler: async (ctx, args) => {
-    const permissions = await getPermissions(ctx);
+    const permissions = await getPermissions(ctx, args.token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }
@@ -87,6 +88,7 @@ export const createCareerOpportunity = mutation({
 export const updateCareerOpportunity = mutation({
   args: {
     opportunityId: v.id("careerOpportunities"),
+    token: v.string(),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
     requirements: v.optional(v.string()),
@@ -95,8 +97,8 @@ export const updateCareerOpportunity = mutation({
     applicationLink: v.optional(v.string()),
     isActive: v.optional(v.boolean()),
   },
-  handler: async (ctx, { opportunityId, ...updates }) => {
-    const permissions = await getPermissions(ctx);
+  handler: async (ctx, { opportunityId, token, ...updates }) => {
+    const permissions = await getPermissions(ctx, token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }

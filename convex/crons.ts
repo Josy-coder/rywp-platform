@@ -13,4 +13,13 @@ crons.weekly(
   internal.publications.cleanupExpiredTokens
 );
 
+crons.daily(
+  "Cleanup expired auth sessions and reset tokens",
+  {
+    hourUTC: 3,
+    minuteUTC: 0
+  },
+  internal.auth.cleanupExpiredAuthData
+);
+
 export default crons;

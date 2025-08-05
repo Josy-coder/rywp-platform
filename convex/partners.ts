@@ -18,13 +18,14 @@ export const getPartners = query({
 
 export const createPartner = mutation({
   args: {
+    token: v.string(),
     name: v.string(),
     website: v.optional(v.string()),
     logo: v.optional(v.id("_storage")),
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const permissions = await getPermissions(ctx);
+    const permissions = await getPermissions(ctx, args.token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }

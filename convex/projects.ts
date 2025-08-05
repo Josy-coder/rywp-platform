@@ -108,6 +108,7 @@ export const getProject = query({
 
 export const createProject = mutation({
   args: {
+    token: v.string(),
     title: v.string(),
     description: v.string(),
     location: v.string(),
@@ -125,7 +126,7 @@ export const createProject = mutation({
     isFeatured: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const permissions = await getPermissions(ctx);
+    const permissions = await getPermissions(ctx, args.token);
     if (!permissions?.canManageHub(args.hubId)) {
       return { error: "Insufficient permissions" };
     }
@@ -149,6 +150,7 @@ export const createProject = mutation({
 
 export const updateProject = mutation({
   args: {
+    token: v.string(),
     projectId: v.id("projects"),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
@@ -166,8 +168,8 @@ export const updateProject = mutation({
     isFeatured: v.optional(v.boolean()),
     isActive: v.optional(v.boolean()),
   },
-  handler: async (ctx, { projectId, ...updates }) => {
-    const permissions = await getPermissions(ctx);
+  handler: async (ctx, { projectId, token, ...updates }) => {
+    const permissions = await getPermissions(ctx, token);
     if (!permissions) return { error: "Not authenticated" };
 
     const project = await ctx.db.get(projectId);
@@ -188,9 +190,12 @@ export const updateProject = mutation({
 });
 
 export const deleteProject = mutation({
-  args: { projectId: v.id("projects") },
-  handler: async (ctx, { projectId }) => {
-    const permissions = await getPermissions(ctx);
+  args: {
+    projectId: v.id("projects"),
+    token: v.string(),
+  },
+  handler: async (ctx, { projectId, token }) => {
+    const permissions = await getPermissions(ctx, token);
     if (!permissions) return { error: "Not authenticated" };
 
     const project = await ctx.db.get(projectId);

@@ -292,3 +292,208 @@ export const sendMembershipApplicationNotification = internalAction({
     }
   },
 });
+
+export const sendPasswordResetEmail = internalAction({
+  args: {
+    to: v.string(),
+    name: v.string(),
+    resetToken: v.string(),
+  },
+  handler: async (_ctx, { to, name, resetToken }) => {
+    try {
+      const resetLink = `${process.env.SITE_URL}/reset-password?token=${resetToken}`;
+
+      const { data, error } = await resend.emails.send({
+        from: "RYWP <noreply@rywp.org>",
+        to: [to],
+        subject: "Reset Your RYWP Password",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #2563eb;">Password Reset Request</h1>
+            
+            <p>Dear ${name},</p>
+            
+            <p>You have requested to reset your password for your RYWP account. Click the button below to create a new password:</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetLink}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
+            </div>
+            
+            <p>This link will expire in 30 minutes for security purposes.</p>
+            
+            <p>If you didn't request this password reset, please ignore this email. Your password will remain unchanged.</p>
+            
+            <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; color: #6b7280; font-size: 14px;">${resetLink}</p>
+            
+            <p>Best regards,<br>The RYWP Team</p>
+            
+            <hr style="margin-top: 40px; border: none; border-top: 1px solid #e5e7eb;">
+            <p style="font-size: 12px; color: #6b7280;">
+              Rwanda Young Water Professionals<br>
+              Email: info@rywp.org<br>
+              Website: <a href="${process.env.SITE_URL}">${process.env.SITE_URL}</a>
+            </p>
+            </div>
+        `,
+      });
+
+      if (error) {
+        return { error: "Failed to send password reset email" };
+      }
+
+      return { success: true, emailId: data?.id };
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
+      return { error: "Failed to send password reset email" };
+    }
+  },
+});
+
+export const sendAdminWelcomeEmail = internalAction({
+  args: {
+    to: v.string(),
+    name: v.string(),
+    temporaryPassword: v.string(),
+    role: v.union(v.literal("admin"), v.literal("superadmin")),
+  },
+  handler: async (_ctx, { to, name, temporaryPassword, role }) => {
+    try {
+      const { data, error } = await resend.emails.send({
+        from: "RYWP <noreply@rywp.org>",
+        to: [to],
+        subject: `Welcome to RYWP - ${role === "superadmin" ? "Super Admin" : "Admin"} Access Granted`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #2563eb;">Welcome to RYWP - Admin Team!</h1>
+            
+            <p>Dear ${name},</p>
+            
+            <p>You have been granted <strong>${role === "superadmin" ? "Super Administrator" : "Administrator"}</strong> access to the Rwanda Young Water Professionals (RYWP) platform.</p>
+            
+            <div style="background-color: #f3f4f6; padding: 20px; border-radius: 5px; margin: 20px 0;">
+              <h3>Login Information:</h3>
+              <p><strong>Email:</strong> ${to}</p>
+              <p><strong>Temporary Password:</strong> <code style="background-color: #e5e7eb; padding: 2px 4px; border-radius: 3px;">${temporaryPassword}</code></p>
+              <p style="color: #dc2626; font-size: 14px;"><strong>Important:</strong> Please change your password immediately after logging in.</p>
+            </div>
+            
+            <p>As an ${role === "superadmin" ? "Super Administrator" : "Administrator"}, you have access to:</p>
+            <ul>
+              <li>Content management system (CMS)</li>
+              <li>User and membership management</li>
+              <li>Hub and project oversight</li>
+              <li>Publication approval and management</li>
+              <li>Event and media management</li>
+              ${role === "superadmin" ? "<li><strong>Creating other admin users</strong></li>" : ""}
+              ${role === "superadmin" ? "<li><strong>Granting temporary admin access</strong></li>" : ""}
+            </ul>
+            
+            <p style="margin-top: 30px;">
+              <a href="${process.env.SITE_URL}/signin" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;">Login to Admin Dashboard</a>
+            </p>
+            
+            <p>If you have any questions about your admin responsibilities, please don't hesitate to reach out.</p>
+            
+            <p>Welcome to the team!</p>
+            <p>The RYWP Leadership</p>
+            
+            <hr style="margin-top: 40px; border: none; border-top: 1px solid #e5e7eb;">
+            <p style="font-size: 12px; color: #6b7280;">
+              Rwanda Young Water Professionals<br>
+              Email: info@rywp.org<br>
+              Website: <a href="${process.env.SITE_URL}">${process.env.SITE_URL}</a>
+            </p>
+          </div>
+        `,
+      });
+
+      if (error) {
+        return { error: "Failed to send admin welcome email" };
+      }
+
+      return { success: true, emailId: data?.id };
+    } catch (error) {
+      console.error("Error sending admin welcome email:", error);
+      return { error: "Failed to send admin welcome email" };
+    }
+  },
+});
+
+export const sendTemporaryAdminAccessEmail = internalAction({
+  args: {
+    to: v.string(),
+    name: v.string(),
+    expiresAt: v.number(),
+  },
+  handler: async (_ctx, { to, name, expiresAt }) => {
+    try {
+      const expiryDate = new Date(expiresAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Africa/Kigali'
+      });
+
+      const { data, error } = await resend.emails.send({
+        from: "RYWP <noreply@rywp.org>",
+        to: [to],
+        subject: "Temporary Admin Access Granted - RYWP",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #059669;">Temporary Admin Access Granted!</h1>
+            
+            <p>Dear ${name},</p>
+            
+            <p>You have been granted temporary administrator access to the Rwanda Young Water Professionals (RYWP) platform.</p>
+            
+            <div style="background-color: #ecfdf5; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #059669;">
+              <h3 style="color: #059669; margin-top: 0;">Access Details:</h3>
+              <p><strong>Access Level:</strong> Temporary Administrator</p>
+              <p><strong>Expires:</strong> ${expiryDate} (Rwanda Time)</p>
+            </div>
+            
+            <p>With temporary admin access, you can:</p>
+            <ul>
+              <li>Manage content and publications</li>
+              <li>Review membership applications</li>
+              <li>Moderate hub activities</li>
+              <li>Access administrative dashboards</li>
+              <li>Manage events and media</li>
+            </ul>
+            
+            <p style="background-color: #fef3c7; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <strong>Note:</strong> This access is temporary and will automatically expire on the date shown above. Please use this access responsibly and in accordance with RYWP policies.
+            </p>
+            
+            <p style="margin-top: 30px;">
+              <a href="${process.env.SITE_URL}/dashboard" style="background-color: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;">Access Admin Dashboard</a>
+            </p>
+            
+            <p>If you have any questions about your temporary admin responsibilities, please contact the RYWP leadership team.</p>
+            
+            <p>Best regards,<br>The RYWP Leadership Team</p>
+            
+            <hr style="margin-top: 40px; border: none; border-top: 1px solid #e5e7eb;">
+            <p style="font-size: 12px; color: #6b7280;">
+              Rwanda Young Water Professionals<br>
+              Email: info@rywp.org<br>
+              Website: <a href="${process.env.SITE_URL}">${process.env.SITE_URL}</a>
+            </p>
+          </div>
+        `,
+      });
+
+      if (error) {
+        return { error: "Failed to send temporary admin access email" };
+      }
+
+      return { success: true, emailId: data?.id };
+    } catch (error) {
+      console.error("Error sending temporary admin access email:", error);
+      return { error: "Failed to send temporary admin access email" };
+    }
+  },
+});

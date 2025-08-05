@@ -80,6 +80,7 @@ export const getMediaItems = query({
 
 export const uploadMediaItem = mutation({
   args: {
+    token: v.string(),
     title: v.string(),
     description: v.optional(v.string()),
     type: v.union(v.literal("image"), v.literal("video")),
@@ -89,7 +90,7 @@ export const uploadMediaItem = mutation({
     projectId: v.optional(v.id("projects")),
   },
   handler: async (ctx, args) => {
-    const permissions = await getPermissions(ctx);
+    const permissions = await getPermissions(ctx, args.token);
     if (!permissions) return { error: "Not authenticated" };
 
     try {
@@ -110,9 +111,12 @@ export const uploadMediaItem = mutation({
 });
 
 export const deleteMediaItem = mutation({
-  args: { mediaId: v.id("mediaItems") },
-  handler: async (ctx, { mediaId }) => {
-    const permissions = await getPermissions(ctx);
+  args: {
+    mediaId: v.id("mediaItems"),
+    token: v.string()
+  },
+  handler: async (ctx, { mediaId, token }) => {
+    const permissions = await getPermissions(ctx, token);
     if (!permissions) return { error: "Not authenticated" };
 
     const mediaItem = await ctx.db.get(mediaId);

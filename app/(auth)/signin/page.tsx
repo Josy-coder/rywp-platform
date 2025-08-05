@@ -1,34 +1,26 @@
 "use client";
 
-import { useAuthActions } from "@convex-dev/auth/react";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/use-auth";
 import { useState, useEffect } from "react";
-import { useQuery, useConvexAuth } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useRouter } from "next/navigation";
 
 export default function SignIn() {
-  const { signIn } = useAuthActions();
-  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const { signIn, isAuthenticated, isLoading, user } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Get current user data when authenticated
-  const currentUser = useQuery(api.auth.getCurrentUser);
-
-  // Handle redirect after successful authentication
   useEffect(() => {
-    if (isAuthenticated && currentUser) {
-      if (currentUser.isGlobalAdmin || currentUser.isSuperAdmin || currentUser.hasTemporaryAdmin) {
+    if (isAuthenticated && user) {
+      if (user.isGlobalAdmin) {
         router.push("/dashboard");
       } else {
         router.push("/member-portal");
       }
     }
-  }, [isAuthenticated, currentUser, router]);
+  }, [isAuthenticated, user, router]);
 
-  // Show loading while checking auth state
-  if (authLoading || (isAuthenticated && !currentUser)) {
+  if (isLoading || (isAuthenticated && user)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -45,14 +37,19 @@ export default function SignIn() {
     setError(null);
 
     const formData = new FormData(e.target as HTMLFormElement);
-    formData.set("flow", "signIn");
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
     try {
-      await signIn("password", formData);
-      // Success - the useEffect above will handle redirect
+      const result = await signIn(email, password);
+
+      if (result.error) {
+        setError(result.error);
+      }
+
     } catch (error: any) {
       console.error("Sign in error:", error);
-      setError(error.message || "Failed to sign in. Please try again.");
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -148,17 +145,23 @@ export default function SignIn() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-white text-gray-500">
-                  New to RYWP?
+                  Need help?
                 </span>
               </div>
             </div>
 
-            <div className="mt-6 text-center">
+            <div className="mt-6 flex flex-col space-y-3 text-center text-sm">
+              <a
+                href="/forgot-password"
+                className="text-blue-600 hover:text-blue-500 font-medium"
+              >
+                Forgot your password?
+              </a>
               <a
                 href="/membership"
-                className="text-blue-600 hover:text-blue-500 text-sm font-medium"
+                className="text-blue-600 hover:text-blue-500 font-medium"
               >
-                Apply for membership →
+                New to RYWP? Apply for membership →
               </a>
             </div>
           </div>
