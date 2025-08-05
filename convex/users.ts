@@ -1,32 +1,42 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { getPermissions } from "./auth";
+import { Doc } from "./_generated/dataModel";
 
-// Get current user with full details
 export const getCurrentUser = query({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return null;
+  args: { token: v.string() },
+  handler: async (ctx, args) => {
+    const permissions = await getPermissions(ctx, args.token);
+    if (!permissions || !permissions.user) {
+      return { error: "Not authenticated" };
+    }
 
-    return await ctx.db.get(userId);
+    return await ctx.db.get(permissions.user._id);
   },
 });
 
-// Get user's hub memberships
 export const getUserHubMemberships = query({
-  args: { userId: v.optional(v.id("users")) },
-  handler: async (ctx, { userId }) => {
-    const currentUserId = await getAuthUserId(ctx);
-    if (!currentUserId) return { error: "Not authenticated" };
+  args: {
+    userId: v.optional(v.id("users")),
+    token: v.string(),
+  },
+  handler: async (ctx, { userId, token }) => {
+    const permissions = await getPermissions(ctx, token);
+    if (!permissions || !permissions.user) {
+      return { error: "Not authenticated" };
+    }
 
-    const targetUserId = userId || currentUserId;
+    const targetUserId = userId;
 
-    const memberships = await ctx.db
-      .query("hubMemberships")
-      .withIndex("by_user", (q) => q.eq("userId", targetUserId))
-      .filter((q) => q.eq(q.field("status"), "approved"))
-      .collect();
+    let memberships: Doc<"hubMemberships">[] = [];
+
+    if (targetUserId) {
+      memberships = await ctx.db
+        .query("hubMemberships")
+        .withIndex("by_user", (q) => q.eq("userId", targetUserId))
+        .filter((q) => q.eq(q.field("status"), "approved"))
+        .collect();
+    }
 
     const results = await Promise.all(
       memberships.map(async (membership) => {
@@ -39,20 +49,27 @@ export const getUserHubMemberships = query({
   },
 });
 
-// Update user profile
 export const updateProfile = mutation({
   args: {
+    userId: v.id("users"),
+    token: v.string(),
     name: v.optional(v.string()),
     bio: v.optional(v.string()),
     position: v.optional(v.string()),
     profileImage: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return { error: "Not authenticated" };
+    const permissions = await getPermissions(ctx, args.token);
+    if (!permissions || !permissions.user) {
+      return { error: "Not authenticated" };
+    }
+
+    if ((permissions.user._id !== args.userId) && (!permissions.isSuperAdmin())) {
+      return { error: "Insufficient permissions" };
+    }
 
     try {
-      await ctx.db.patch(userId, args);
+      await ctx.db.patch(args.userId, args);
       return { success: true };
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -61,7 +78,6 @@ export const updateProfile = mutation({
   },
 });
 
-// Get team members for About Us page
 export const getTeamMembers = query({
   args: {
     category: v.union(
@@ -73,28 +89,23 @@ export const getTeamMembers = query({
     isPublicTeamMember: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    // Start the query on the "users" collection
+
     let membersQuery = ctx.db.query("users").withIndex("by_team_category");
 
-    // Apply filter based on `category` if it's not "all"
     if (args.category !== "all") {
       membersQuery = membersQuery.filter(q => q.eq(q.field("teamCategory"), args.category));
     }
 
-    // Apply `isPublicTeamMember` filter if it's provided
     if (args.isPublicTeamMember !== undefined) {
       membersQuery = membersQuery.filter(q =>
         q.eq(q.field("isPublicTeamMember"), args.isPublicTeamMember)
       );
     }
 
-    // Always filter by active status
     membersQuery = membersQuery.filter(q => q.eq(q.field("isActive"), true));
 
-    // Collect the results
     const members = await membersQuery.collect();
 
-    // Group by category if "all" is selected
     if (args.category === "all") {
       const grouped = {
         founding: members.filter(m => m.teamCategory === "founding"),
@@ -104,24 +115,23 @@ export const getTeamMembers = query({
       return { data: grouped };
     }
 
-    // Return filtered results
     return { data: members };
   },
 });
 
-// Admin functions
 export const promoteUser = mutation({
   args: {
     userId: v.id("users"),
     role: v.union(v.literal("admin"), v.literal("member")),
     temporaryUntil: v.optional(v.number()),
+    token: v.string(),
   },
-  handler: async (ctx, { userId, role, temporaryUntil }) => {
-    const currentUserId = await getAuthUserId(ctx);
-    if (!currentUserId) return { error: "Not authenticated" };
-
-    const currentUser = await ctx.db.get(currentUserId);
-    if (!currentUser || currentUser.globalRole !== "superadmin") {
+  handler: async (ctx, { userId, role, temporaryUntil, token }) => {
+    const permissions = await getPermissions(ctx, token);
+    if (!permissions || !permissions.user) {
+      return { error: "Not authenticated" };
+    }
+    if (!permissions.isSuperAdmin()) {
       return { error: "Insufficient permissions" };
     }
 

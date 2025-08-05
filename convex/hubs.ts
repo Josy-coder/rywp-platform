@@ -1,7 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getPermissions } from "./auth";
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { internal } from "./_generated/api";
 
 export const getHubs = query({
@@ -61,7 +60,7 @@ export const createHub = mutation({
     name: v.string(),
     description: v.string(),
     objectives: v.string(),
-    membershipFormFields: v.array(v.any()), // Using v.any() for complex form field schema
+    membershipFormFields: v.array(v.any()),
     image: v.optional(v.id("_storage")),
     termsOfReference: v.optional(v.id("_storage")),
   },
@@ -118,19 +117,22 @@ export const applyToHub = mutation({
   args: {
     hubId: v.id("hubs"),
     applicationData: v.object({}),
+    token: v.string(),
   },
-  handler: async (ctx, { hubId, applicationData }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return { error: "Not authenticated" };
-
-    const user = await ctx.db.get(userId);
-    if (!user || user.globalRole !== "member") {
+  handler: async (ctx, { hubId, applicationData, token }) => {
+    const permissions = await getPermissions(ctx, token);
+    if (!permissions || !permissions.user) {
       return { error: "Must be an organization member to apply to hubs" };
     }
 
+    if (permissions.hubMemberships.length > 0) {
+      return { error: "You are already a member of another hub" };
+    }
+
+
     const existing = await ctx.db
       .query("hubMemberships")
-      .withIndex("by_user_hub", (q) => q.eq("userId", userId).eq("hubId", hubId))
+      .withIndex("by_user_hub", (q) => q.eq("userId", permissions.user._id).eq("hubId", hubId))
       .unique();
 
     if (existing) {
@@ -142,7 +144,7 @@ export const applyToHub = mutation({
       if (!hub) return { error: "Hub not found" };
 
       await ctx.db.insert("hubMemberships", {
-        userId,
+        userId: permissions.user._id,
         hubId,
         role: "member",
         applicationData,
