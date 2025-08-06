@@ -33,6 +33,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  currentToken: string | null;
   signIn: (email: string, password: string) => Promise<{ success?: boolean; error?: string }>;
   signOut: () => Promise<void>;
   requestPasswordReset: (email: string) => Promise<{ success?: boolean; error?: string; message?: string }>;
@@ -297,6 +298,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     isLoading,
     isAuthenticated: !!user,
+    currentToken,
     signIn,
     signOut,
     requestPasswordReset,

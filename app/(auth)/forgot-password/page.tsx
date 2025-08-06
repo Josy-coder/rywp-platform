@@ -1,29 +1,36 @@
 "use client";
 
 import { useAuth } from "@/hooks/use-auth";
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, CheckCircle2, Loader2, Mail } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ForgotPassword() {
   const { requestPasswordReset } = useAuth();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setMessage(null);
 
     try {
       const result = await requestPasswordReset(email);
 
       if (result.success || result.message) {
         setSubmitted(true);
-        setMessage(result.message || "Password reset instructions sent!");
+        toast.success("Password reset instructions sent!", {
+          description: result.message || "Check your email for further instructions.",
+        });
       } else {
         setError(result.error || "Failed to send reset instructions");
       }
@@ -41,40 +48,39 @@ export default function ForgotPassword() {
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="text-center">
             <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-              <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              <CheckCircle2 className="h-6 w-6 text-green-600" />
             </div>
             <h2 className="mt-6 text-3xl font-bold text-gray-900">
               Check your email
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              {message}
+              We&#39;ve sent password reset instructions to your email
             </p>
           </div>
         </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <div className="text-center">
-              <p className="text-sm text-gray-600 mb-6">
-                If an account exists with the email <strong>{email}</strong>, you&#39;ll receive password reset instructions within a few minutes.
-              </p>
-
-              <div className="space-y-3">
-                <p className="text-xs text-gray-500">
-                  Didn&#39;t receive the email? Check your spam folder or contact support.
+          <Card>
+            <CardContent >
+              <div className="text-center space-y-4">
+                <Mail className="h-8 w-8 text-primary mx-auto" />
+                <p className="text-sm text-gray-600">
+                  If an account exists with the email <strong>{email}</strong>, you&#39;ll receive password reset instructions within a few minutes.
                 </p>
 
-                <Link
-                  href="/signin"
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Back to Sign In
-                </Link>
+                <div className="space-y-3">
+                  <Button asChild className="w-full">
+                    <Link href="/signin">
+                      Back to Sign In
+                    </Link>
+                  </Button>
+                  <p className="text-xs text-gray-500">
+                    Didn&#39;t receive the email? Check your spam folder or contact support.
+                  </p>
+                </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -94,14 +100,12 @@ export default function ForgotPassword() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <div className="mt-1">
-                <input
+        <Card>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email address</Label>
+                <Input
                   id="email"
                   name="email"
                   type="email"
@@ -109,67 +113,56 @@ export default function ForgotPassword() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter your email address"
                 />
               </div>
-            </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                <div className="flex">
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">
-                      Error
-                    </h3>
-                    <div className="mt-2 text-sm text-red-700">
-                      <p>{error}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
 
-            <div>
-              <button
+              <Button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full"
               >
                 {loading ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Sending...
-                  </div>
+                  </>
                 ) : (
                   "Send reset instructions"
                 )}
-              </button>
-            </div>
-          </form>
+              </Button>
+            </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+            <div className="mt-6">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">
+                    Remember your password?
+                  </span>
+                </div>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Remember your password?
-                </span>
-              </div>
-            </div>
 
-            <div className="mt-6 text-center">
-              <Link
-                href="/signin"
-                className="text-blue-600 hover:text-blue-500 text-sm font-medium"
-              >
-                Back to Sign In
-              </Link>
+              <div className="mt-6 text-center">
+                <Link
+                  href="/signin"
+                  className="text-primary hover:text-primary/80 text-sm font-medium"
+                >
+                  Back to Sign In
+                </Link>
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -17,6 +17,7 @@ import type * as auth from "../auth.js";
 import type * as careers from "../careers.js";
 import type * as contact from "../contact.js";
 import type * as crons from "../crons.js";
+import type * as dashboard from "../dashboard.js";
 import type * as emails from "../emails.js";
 import type * as events from "../events.js";
 import type * as files from "../files.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   careers: typeof careers;
   contact: typeof contact;
   crons: typeof crons;
+  dashboard: typeof dashboard;
   emails: typeof emails;
   events: typeof events;
   files: typeof files;

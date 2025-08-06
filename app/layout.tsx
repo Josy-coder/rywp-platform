@@ -1,7 +1,8 @@
+import "./globals.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import ConvexClientProvider from "@/components/ConvexClientProvider";
+import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/use-auth";
 import React from "react";
 
@@ -85,6 +86,7 @@ export default function RootLayout({
     <ConvexClientProvider>
       <AuthProvider>
         {children}
+        <Toaster richColors closeButton position="top-right" />
       </AuthProvider>
     </ConvexClientProvider>
     </body>
