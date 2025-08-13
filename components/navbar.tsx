@@ -68,13 +68,13 @@ export function Navbar({
         </Button>
 
 
-        <div className="hidden lg:flex items-center pb-7">
+        <div className="hidden lg:flex items-center">
           <Image
             src="/images/logo-4.png"
             alt="RYWP Logo"
-            width={300}
+            width={200}
             height={100}
-            className="h-64 w-full"
+            className="h-24 w-full"
           />
         </div>
       </div>

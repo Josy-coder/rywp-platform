@@ -93,13 +93,16 @@ export default function AdminLayout({
           </div>
         </main>
 
-        
-        <div className="fixed top-16 right-0 bottom-0 z-30">
-          <Notifications
-            isOpen={notificationsOpen}
-            onClose={closeNotifications}
-          />
-        </div>
+
+        {notificationsOpen && (
+          <div className="fixed top-16 right-0 bottom-0 z-30">
+            <Notifications
+              isOpen={notificationsOpen}
+              onClose={closeNotifications}
+            />
+          </div>
+        )}
+
       </div>
 
       

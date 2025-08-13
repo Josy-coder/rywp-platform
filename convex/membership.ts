@@ -2,6 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getPermissions, hashPassword } from "./auth";
 import { internal } from "./_generated/api";
+import { paginationOptsValidator } from "convex/server";
 
 export const getMembershipFormConfig = query({
   args: {},
@@ -93,35 +94,54 @@ export const submitMembershipApplication = mutation({
 
 export const getMembershipApplications = query({
   args: {
+    paginationOpts: paginationOptsValidator,
     status: v.optional(v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected"))),
+    search: v.optional(v.string()),
     token: v.string(),
   },
-  handler: async (ctx, { status, token}) => {
+  handler: async (ctx, { paginationOpts, status, search, token }) => {
     const permissions = await getPermissions(ctx, token);
     if (!permissions?.isGlobalAdmin()) {
       return { error: "Insufficient permissions" };
     }
 
-    let applications;
-    if (status) {
-      applications = await ctx.db
-        .query("membershipApplications")
-        .withIndex("by_status", (q) => q.eq("status", status))
-        .collect();
-    } else {
-      applications = await ctx.db
-        .query("membershipApplications")
-        .collect();
+    let applications = await ctx.db.query("membershipApplications")
+      .withIndex("by_status", (q) => q.eq("status", status as "pending" | "approved" | "rejected"))
+      .order("desc")
+      .collect();
+
+
+    if (search && search.trim()) {
+      const searchTerm = search.toLowerCase().trim();
+      applications = applications.filter(app =>
+        app.applicantName.toLowerCase().includes(searchTerm) ||
+        app.applicantEmail.toLowerCase().includes(searchTerm)
+      );
     }
 
+    const startIndex = (paginationOpts.cursor ? parseInt(paginationOpts.cursor) : 0);
+    const endIndex = startIndex + paginationOpts.numItems;
+    const pageApplications = applications.slice(startIndex, endIndex);
+
     const enrichedApplications = await Promise.all(
-      applications.map(async (app) => {
+      pageApplications.map(async (app) => {
         const reviewer = app.reviewedBy ? await ctx.db.get(app.reviewedBy) : null;
         return { ...app, reviewer };
       })
     );
 
-    return { data: enrichedApplications };
+    const hasMore = endIndex < applications.length;
+    const nextCursor = hasMore ? endIndex.toString() : null;
+
+    return {
+      data: {
+        page: enrichedApplications,
+        isDone: !hasMore,
+        continueCursor: nextCursor,
+        totalCount: applications.length,
+        filteredCount: applications.length
+      }
+    };
   },
 });
 
@@ -151,12 +171,11 @@ export const reviewMembershipApplication = mutation({
       });
 
       if (status === "approved") {
-        // Generate temporary password
+
         const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
         const { hash, salt } = await hashPassword(tempPassword);
         const hashedPassword = `${hash}:${salt}`;
 
-        // Create user account
         await ctx.db.insert("users", {
           name: application.applicantName,
           email: application.applicantEmail,
@@ -183,5 +202,82 @@ export const reviewMembershipApplication = mutation({
       console.error("Failed to review application:", error);
       return { error: "Failed to review application" };
     }
+  },
+});
+
+export const getMembers = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    search: v.optional(v.string()),
+    role: v.optional(v.union(v.literal("member"), v.literal("admin"), v.literal("superadmin"))),
+    hubId: v.optional(v.id("hubs")),
+    token: v.string(),
+  },
+  handler: async (ctx, { paginationOpts, search, role, hubId, token }) => {
+    const permissions = await getPermissions(ctx, token);
+    if (!permissions?.isGlobalAdmin()) {
+      return { error: "Insufficient permissions" };
+    }
+
+    let users = await ctx.db.query("users").order("desc").collect();
+
+    if (role) {
+      users = users.filter(user => user.globalRole === role);
+    }
+
+    if (search && search.trim()) {
+      const searchTerm = search.toLowerCase().trim();
+      users = users.filter(user =>
+        user.name.toLowerCase().includes(searchTerm) ||
+        user.email.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    if (hubId) {
+      const hubMemberships = await ctx.db
+        .query("hubMemberships")
+        .withIndex("by_hub", (q) => q.eq("hubId", hubId))
+        .filter((q) => q.eq(q.field("status"), "approved"))
+        .collect();
+
+      const hubMemberIds = new Set(hubMemberships.map(m => m.userId));
+      users = users.filter(user => hubMemberIds.has(user._id));
+    }
+
+    const startIndex = (paginationOpts.cursor ? parseInt(paginationOpts.cursor) : 0);
+    const endIndex = startIndex + paginationOpts.numItems;
+    const pageUsers = users.slice(startIndex, endIndex);
+
+    const enrichedUsers = await Promise.all(
+      pageUsers.map(async (user) => {
+        const memberships = await ctx.db
+          .query("hubMemberships")
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
+          .filter((q) => q.eq(q.field("status"), "approved"))
+          .collect();
+
+        const enrichedMemberships = await Promise.all(
+          memberships.map(async (membership) => {
+            const hub = await ctx.db.get(membership.hubId);
+            return { ...membership, hub };
+          })
+        );
+
+        return { ...user, hubMemberships: enrichedMemberships };
+      })
+    );
+
+    const hasMore = endIndex < users.length;
+    const nextCursor = hasMore ? endIndex.toString() : null;
+
+    return {
+      data: {
+        page: enrichedUsers,
+        isDone: !hasMore,
+        continueCursor: nextCursor,
+        totalCount: users.length,
+        filteredCount: users.length
+      }
+    };
   },
 });

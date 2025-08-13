@@ -107,7 +107,7 @@ export function Sidebar({ isCollapsed = false, isMobileOpen, onMobileClose }: Si
                   "flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out",
                   isActive
                     ? "bg-primary text-white shadow-sm"
-                    : "text-gray-700 hover:bg-[#29c3ec] hover:text-white",
+                    : "text-gray-700 hover:bg-dark-blue hover:text-white",
                   isCollapsed && showTooltips && "justify-center px-3 py-2.5"
                 )}
               >

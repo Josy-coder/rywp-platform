@@ -2,6 +2,8 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getPermissions } from "./auth";
 import { internal } from "./_generated/api";
+import { paginationOptsValidator } from "convex/server";
+import { Id } from "./_generated/dataModel";
 
 export const getHubs = query({
   args: { activeOnly: v.optional(v.boolean()) },
@@ -209,5 +211,70 @@ export const reviewHubApplication = mutation({
       console.error("Failed to review application:", error);
       return { error: "Failed to review application" };
     }
+  },
+});
+
+export const getHubApplications = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    hubId: v.optional(v.id("hubs")),
+    status: v.optional(v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected"))),
+    search: v.optional(v.string()),
+    token: v.string(),
+  },
+  handler: async (ctx, { paginationOpts, hubId, status, search, token }) => {
+    const permissions = await getPermissions(ctx, token);
+    if (!permissions?.isGlobalAdmin() && (!hubId || !permissions?.canManageHub(hubId))) {
+      return { error: "Insufficient permissions" };
+    }
+
+    let applications = await ctx.db.query("hubMemberships")
+      .withIndex("by_hub", (q) => q.eq("hubId", hubId as Id<"hubs">))
+      .filter((q) => q.eq(q.field("status"), status))
+      .order("desc")
+      .collect();
+
+    if (search && search.trim()) {
+      const searchTerm = search.toLowerCase().trim();
+      const userIds = new Set();
+
+      const allUsers = await ctx.db.query("users").collect();
+      allUsers.forEach(user => {
+        if (user.name.toLowerCase().includes(searchTerm) ||
+          user.email.toLowerCase().includes(searchTerm)) {
+          userIds.add(user._id);
+        }
+      });
+
+      applications = applications.filter(app => userIds.has(app.userId));
+    }
+
+    const startIndex = (paginationOpts.cursor ? parseInt(paginationOpts.cursor) : 0);
+    const endIndex = startIndex + paginationOpts.numItems;
+    const pageApplications = applications.slice(startIndex, endIndex);
+
+    const enrichedApplications = await Promise.all(
+      pageApplications.map(async (app) => {
+        const [user, hub, reviewer] = await Promise.all([
+          ctx.db.get(app.userId),
+          ctx.db.get(app.hubId),
+          app.reviewedBy ? ctx.db.get(app.reviewedBy) : null
+        ]);
+        return { ...app, user, hub, reviewer };
+      })
+    );
+
+    const hasMore = endIndex < applications.length;
+    const nextCursor = hasMore ? endIndex.toString() : null;
+
+    return {
+      data: {
+        page: enrichedApplications,
+        isDone: !hasMore,
+        continueCursor: nextCursor,
+        totalCount: applications.length,
+        filteredCount: applications.length
+      }
+    };
   },
 });
