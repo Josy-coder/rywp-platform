@@ -133,7 +133,17 @@ export const createProject = mutation({
 
     try {
       const projectId = await ctx.db.insert("projects", {
-        ...args,
+        title: args.title,
+        description: args.description,
+        location: args.location,
+        coordinates: args.coordinates,
+        status: args.status,
+        theme: args.theme,
+        hubId: args.hubId,
+        partnerIds: args.partnerIds,
+        featuredImage: args.featuredImage,
+        startDate: args.startDate,
+        endDate: args.endDate,
         isFeatured: args.isFeatured || false,
         isActive: true,
         createdAt: Date.now(),
@@ -203,6 +213,14 @@ export const deleteProject = mutation({
 
     if (!permissions.canManageHub(project.hubId)) {
       return { error: "Insufficient permissions" };
+    }
+
+    if (project.featuredImage) {
+      try {
+        await ctx.storage.delete(project.featuredImage);
+      } catch (error) {
+        console.warn("Failed to delete project image:", error);
+      }
     }
 
     try {

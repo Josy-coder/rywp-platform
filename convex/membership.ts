@@ -56,7 +56,6 @@ export const submitMembershipApplication = mutation({
   },
   handler: async (ctx, args) => {
     try {
-
       const formConfig = await ctx.db.query("membershipFormConfig").first();
       if (!formConfig) {
         return { error: "Membership form not configured" };
@@ -92,66 +91,12 @@ export const submitMembershipApplication = mutation({
   },
 });
 
-export const getMembershipApplications = query({
-  args: {
-    paginationOpts: paginationOptsValidator,
-    status: v.optional(v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected"))),
-    search: v.optional(v.string()),
-    token: v.string(),
-  },
-  handler: async (ctx, { paginationOpts, status, search, token }) => {
-    const permissions = await getPermissions(ctx, token);
-    if (!permissions?.isGlobalAdmin()) {
-      return { error: "Insufficient permissions" };
-    }
-
-    let applications = await ctx.db.query("membershipApplications")
-      .withIndex("by_status", (q) => q.eq("status", status as "pending" | "approved" | "rejected"))
-      .order("desc")
-      .collect();
-
-
-    if (search && search.trim()) {
-      const searchTerm = search.toLowerCase().trim();
-      applications = applications.filter(app =>
-        app.applicantName.toLowerCase().includes(searchTerm) ||
-        app.applicantEmail.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    const startIndex = (paginationOpts.cursor ? parseInt(paginationOpts.cursor) : 0);
-    const endIndex = startIndex + paginationOpts.numItems;
-    const pageApplications = applications.slice(startIndex, endIndex);
-
-    const enrichedApplications = await Promise.all(
-      pageApplications.map(async (app) => {
-        const reviewer = app.reviewedBy ? await ctx.db.get(app.reviewedBy) : null;
-        return { ...app, reviewer };
-      })
-    );
-
-    const hasMore = endIndex < applications.length;
-    const nextCursor = hasMore ? endIndex.toString() : null;
-
-    return {
-      data: {
-        page: enrichedApplications,
-        isDone: !hasMore,
-        continueCursor: nextCursor,
-        totalCount: applications.length,
-        filteredCount: applications.length
-      }
-    };
-  },
-});
-
-
 export const reviewMembershipApplication = mutation({
   args: {
     applicationId: v.id("membershipApplications"),
     status: v.union(v.literal("approved"), v.literal("rejected")),
     notes: v.optional(v.string()),
-    token: v.string(), // Add token for auth
+    token: v.string(),
   },
   handler: async (ctx, { applicationId, status, notes, token }) => {
     try {
@@ -171,7 +116,6 @@ export const reviewMembershipApplication = mutation({
       });
 
       if (status === "approved") {
-
         const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
         const { hash, salt } = await hashPassword(tempPassword);
         const hashedPassword = `${hash}:${salt}`;
@@ -201,6 +145,170 @@ export const reviewMembershipApplication = mutation({
     } catch (error) {
       console.error("Failed to review application:", error);
       return { error: "Failed to review application" };
+    }
+  },
+});
+
+export const getMembershipApplications = query({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
+    search: v.optional(v.string()),
+    token: v.string(),
+  },
+  handler: async (ctx, { paginationOpts, status, search, token }) => {
+    const permissions = await getPermissions(ctx, token);
+    if (!permissions?.isGlobalAdmin()) {
+      return { error: "Insufficient permissions" };
+    }
+
+    const query = ctx.db
+      .query("membershipApplications")
+      .withIndex("by_status", (q) => q.eq("status", status));
+
+    if (search && search.trim()) {
+      const searchTerm = search.toLowerCase().trim();
+
+      const allApplications = await query.collect();
+      const searchFiltered = allApplications.filter(app =>
+        app.applicantName.toLowerCase().includes(searchTerm) ||
+        app.applicantEmail.toLowerCase().includes(searchTerm)
+      );
+
+      const startIndex = paginationOpts.cursor ? parseInt(paginationOpts.cursor) : 0;
+      const endIndex = startIndex + paginationOpts.numItems;
+      const pageApplications = searchFiltered.slice(startIndex, endIndex);
+
+      const enrichedApplications = await Promise.all(
+        pageApplications.map(async (app) => {
+          const reviewer = app.reviewedBy ? await ctx.db.get(app.reviewedBy) : null;
+          return { ...app, reviewer };
+        })
+      );
+
+      const hasMore = endIndex < searchFiltered.length;
+      const nextCursor = hasMore ? endIndex.toString() : null;
+
+      return {
+        page: enrichedApplications,
+        isDone: !hasMore,
+        continueCursor: nextCursor,
+      };
+    }
+
+    const result = await query.order("desc").paginate(paginationOpts);
+
+    const enrichedApplications = await Promise.all(
+      result.page.map(async (app) => {
+        const reviewer = app.reviewedBy ? await ctx.db.get(app.reviewedBy) : null;
+        return { ...app, reviewer };
+      })
+    );
+
+    return {
+      ...result,
+      page: enrichedApplications,
+    };
+  },
+});
+
+export const createMember = mutation({
+  args: {
+    email: v.string(),
+    name: v.string(),
+    phone: v.optional(v.string()),
+    globalRole: v.union(v.literal("member"), v.literal("admin")),
+    token: v.string(),
+  },
+  handler: async (ctx, args) => {
+    try {
+      const permissions = await getPermissions(ctx, args.token);
+      if (!permissions?.isGlobalAdmin()) {
+        return { error: "Insufficient permissions" };
+      }
+
+      const existingUser = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", args.email))
+        .first();
+
+      if (existingUser) {
+        return { error: "User with this email already exists" };
+      }
+
+      const tempPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+      const { hash, salt } = await hashPassword(tempPassword);
+      const hashedPassword = `${hash}:${salt}`;
+
+      const userId = await ctx.db.insert("users", {
+        name: args.name,
+        email: args.email,
+        phone: args.phone,
+        password: hashedPassword,
+        emailVerified: false,
+        globalRole: args.globalRole,
+        isActive: true,
+        joinedAt: Date.now(),
+        failedLoginAttempts: 0,
+      });
+
+      await ctx.scheduler.runAfter(0, internal.emails.sendWelcomeEmail, {
+        to: args.email,
+        name: args.name,
+        temporaryPassword: tempPassword,
+      });
+
+      return { success: true, userId, message: "Member created successfully. Welcome email sent with temporary password." };
+    } catch (error) {
+      console.error("Failed to create user:", error);
+      return { error: "Failed to create user" };
+    }
+  },
+});
+
+export const updateMember = mutation({
+  args: {
+    memberId: v.id("users"),
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    globalRole: v.optional(v.union(v.literal("member"), v.literal("admin"), v.literal("superadmin"))),
+    isActive: v.optional(v.boolean()),
+    token: v.string(),
+  },
+  handler: async (ctx, { memberId, token, ...updates }) => {
+    try {
+      const permissions = await getPermissions(ctx, token);
+      if (!permissions?.isGlobalAdmin()) {
+        return { error: "Insufficient permissions" };
+      }
+
+      const member = await ctx.db.get(memberId);
+      if (!member) {
+        return { error: "Member not found" };
+      }
+
+      if (updates.email && updates.email !== member.email) {
+        const existingUser = await ctx.db
+          .query("users")
+          .withIndex("by_email", (q) => q.eq("email", updates.email as string))
+          .first();
+
+        if (existingUser) {
+          return { error: "A user with this email already exists" };
+        }
+      }
+
+      const cleanUpdates = Object.fromEntries(
+        Object.entries(updates).filter(([_, value]) => value !== undefined)
+      );
+
+      await ctx.db.patch(memberId, cleanUpdates);
+
+      return { success: true, message: "Member updated successfully" };
+    } catch (error) {
+      console.error("Failed to update member:", error);
+      return { error: "Failed to update member" };
     }
   },
 });
@@ -244,7 +352,7 @@ export const getMembers = query({
       users = users.filter(user => hubMemberIds.has(user._id));
     }
 
-    const startIndex = (paginationOpts.cursor ? parseInt(paginationOpts.cursor) : 0);
+    const startIndex = paginationOpts.cursor ? parseInt(paginationOpts.cursor) : 0;
     const endIndex = startIndex + paginationOpts.numItems;
     const pageUsers = users.slice(startIndex, endIndex);
 
@@ -271,13 +379,9 @@ export const getMembers = query({
     const nextCursor = hasMore ? endIndex.toString() : null;
 
     return {
-      data: {
-        page: enrichedUsers,
-        isDone: !hasMore,
-        continueCursor: nextCursor,
-        totalCount: users.length,
-        filteredCount: users.length
-      }
+      page: enrichedUsers,
+      isDone: !hasMore,
+      continueCursor: nextCursor,
     };
   },
 });

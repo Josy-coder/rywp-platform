@@ -74,7 +74,12 @@ export const createHub = mutation({
 
     try {
       const hubId = await ctx.db.insert("hubs", {
-        ...args,
+        name: args.name,
+        description: args.description,
+        objectives: args.objectives,
+        membershipFormFields: args.membershipFormFields,
+        image: args.image,
+        termsOfReference: args.termsOfReference,
         isActive: true,
         createdAt: Date.now(),
         createdBy: permissions.user._id,
@@ -217,44 +222,49 @@ export const reviewHubApplication = mutation({
 export const getHubApplications = query({
   args: {
     paginationOpts: paginationOptsValidator,
-    hubId: v.optional(v.id("hubs")),
+    hubId: v.id("hubs"),
     status: v.optional(v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected"))),
     search: v.optional(v.string()),
     token: v.string(),
   },
   handler: async (ctx, { paginationOpts, hubId, status, search, token }) => {
     const permissions = await getPermissions(ctx, token);
-    if (!permissions?.isGlobalAdmin() && (!hubId || !permissions?.canManageHub(hubId))) {
+    if (!permissions?.isGlobalAdmin() && !permissions?.canManageHub(hubId)) {
       return { error: "Insufficient permissions" };
     }
 
-    let applications = await ctx.db.query("hubMemberships")
-      .withIndex("by_hub", (q) => q.eq("hubId", hubId as Id<"hubs">))
-      .filter((q) => q.eq(q.field("status"), status))
-      .order("desc")
-      .collect();
+    let query = ctx.db
+      .query("hubMemberships")
+      .withIndex("by_hub", (q) => q.eq("hubId", hubId));
+
+    if (status) {
+      query = query.filter((q) => q.eq(q.field("status"), status));
+    }
 
     if (search && search.trim()) {
       const searchTerm = search.toLowerCase().trim();
-      const userIds = new Set();
 
       const allUsers = await ctx.db.query("users").collect();
+      const matchingUserIds: Set<Id<"users">> = new Set();
+
       allUsers.forEach(user => {
         if (user.name.toLowerCase().includes(searchTerm) ||
           user.email.toLowerCase().includes(searchTerm)) {
-          userIds.add(user._id);
+          matchingUserIds.add(user._id);
         }
       });
 
-      applications = applications.filter(app => userIds.has(app.userId));
+      query = query.filter((q) => {
+        return Array.from(matchingUserIds).some(userId =>
+          q.eq(q.field("userId"), userId)
+        );
+      });
     }
 
-    const startIndex = (paginationOpts.cursor ? parseInt(paginationOpts.cursor) : 0);
-    const endIndex = startIndex + paginationOpts.numItems;
-    const pageApplications = applications.slice(startIndex, endIndex);
+    const result = await query.order("desc").paginate(paginationOpts);
 
     const enrichedApplications = await Promise.all(
-      pageApplications.map(async (app) => {
+      result.page.map(async (app) => {
         const [user, hub, reviewer] = await Promise.all([
           ctx.db.get(app.userId),
           ctx.db.get(app.hubId),
@@ -264,17 +274,9 @@ export const getHubApplications = query({
       })
     );
 
-    const hasMore = endIndex < applications.length;
-    const nextCursor = hasMore ? endIndex.toString() : null;
-
     return {
-      data: {
-        page: enrichedApplications,
-        isDone: !hasMore,
-        continueCursor: nextCursor,
-        totalCount: applications.length,
-        filteredCount: applications.length
-      }
+      ...result,
+      page: enrichedApplications,
     };
   },
 });
