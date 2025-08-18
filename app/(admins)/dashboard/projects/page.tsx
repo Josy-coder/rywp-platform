@@ -6,6 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { useState, useMemo, useEffect, Suspense} from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -633,11 +634,14 @@ const ProjectsPageContent = () => {
               <Card key={project._id} className="overflow-hidden transition-all hover:shadow-md">
                 <div className="aspect-video relative">
                   {project.featuredImage ? (
-                    <img
+                    <Image
                       src={project.featuredImage}
                       alt={project.title}
+                      layout="responsive"
+                      width={700}
+                      height={475}
                       className="object-cover w-full h-full"
-                    />
+                      />
                   ) : (
                     <div className="w-full h-full bg-muted flex items-center justify-center">
                       <ImageIcon className="h-8 w-8 text-muted-foreground" />

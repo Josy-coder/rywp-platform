@@ -5,6 +5,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -212,9 +213,12 @@ export default function ProjectDetailsPage() {
           {/* Featured Image */}
           {project.featuredImage ? (
             <div className="aspect-video relative overflow-hidden rounded-lg">
-              <img
+              <Image
                 src={project.featuredImage}
                 alt={project.title}
+                layout="responsive"
+                width={700}
+                height={475}
                 className="object-cover w-full h-full"
               />
               {project.isFeatured && (
@@ -300,10 +304,12 @@ export default function ProjectDetailsPage() {
                     {project.partners.map((partner) => (
                       <div key={partner._id} className="flex items-center space-x-3 p-3 border rounded-lg">
                         {partner.logo ? (
-                          <img
+                          <Image
                             src={partner.logo}
                             alt={`${partner.name} logo`}
-                            className="h-10 w-10 object-contain rounded border"
+                            width={40}
+                            height={40}
+                            className="object-contain rounded border"
                           />
                         ) : (
                           <div className="h-10 w-10 bg-muted rounded flex items-center justify-center">

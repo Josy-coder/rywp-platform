@@ -66,6 +66,25 @@ export const getPublications = query({
   },
 });
 
+export const getPublication = query({
+  args: { publicationId: v.id("publications") },
+  handler: async (ctx, { publicationId }) => {
+    const publication = await ctx.db.get(publicationId);
+    if (!publication) return { error: "Publication not found" };
+
+    const author = await ctx.db.get(publication.authorId);
+    const approver = publication.approvedBy ? await ctx.db.get(publication.approvedBy) : null;
+
+    return {
+      data: {
+        ...publication,
+        author,
+        approver,
+      }
+    };
+  },
+});
+
 export const getPublishedPublications = query({
   args: {
     type: v.optional(v.union(
@@ -151,6 +170,84 @@ export const createPublication = mutation({
     }
   },
 });
+
+export const updatePublication = mutation({
+  args: {
+    token: v.string(),
+    publicationId: v.id("publications"),
+    title: v.optional(v.string()),
+    content: v.optional(v.string()),
+    type: v.optional(v.union(
+      v.literal("policy_brief"),
+      v.literal("article"),
+      v.literal("blog_post"),
+      v.literal("press_release"),
+      v.literal("technical_report")
+    )),
+    featuredImage: v.optional(v.id("_storage")),
+    attachments: v.optional(v.array(v.id("_storage"))),
+    tags: v.optional(v.array(v.string())),
+    isRestrictedAccess: v.optional(v.boolean()),
+    status: v.optional(v.union(v.literal("draft"), v.literal("pending"), v.literal("published"))),
+  },
+  handler: async (ctx, { publicationId, token, ...updates }) => {
+    const permissions = await getPermissions(ctx, token);
+    if (!permissions) return { error: "Not authenticated" };
+
+    const publication = await ctx.db.get(publicationId);
+    if (!publication) return { error: "Publication not found" };
+
+    const isAuthor = publication.authorId === permissions.user._id;
+    const isAdmin = permissions.isGlobalAdmin();
+
+    if (!isAuthor && !isAdmin) {
+      return { error: "Insufficient permissions" };
+    }
+
+    if (updates.status === "published" && !isAdmin) {
+      return { error: "Only admins can publish publications" };
+    }
+
+    try {
+
+      const updateData: any = { ...updates };
+
+      if (updates.featuredImage && publication.featuredImage && updates.featuredImage !== publication.featuredImage) {
+        try {
+          await ctx.storage.delete(publication.featuredImage);
+        } catch (error) {
+          console.warn("Failed to delete old featured image:", error);
+        }
+      }
+
+      if (updates.attachments && publication.attachments) {
+        const oldAttachments = publication.attachments;
+        const newAttachments = updates.attachments;
+        const attachmentsToDelete = oldAttachments.filter(id => !newAttachments.includes(id));
+
+        for (const attachmentId of attachmentsToDelete) {
+          try {
+            await ctx.storage.delete(attachmentId);
+          } catch (error) {
+            console.warn("Failed to delete old attachment:", error);
+          }
+        }
+      }
+
+      if (updates.status === "published" && publication.status !== "published") {
+        updateData.publishedAt = Date.now();
+        updateData.approvedBy = permissions.user._id;
+      }
+
+      await ctx.db.patch(publicationId, updateData);
+      return { success: true };
+    } catch (error) {
+      console.error("Error updating publication:", error);
+      return { error: "Failed to update publication" };
+    }
+  },
+});
+
 
 export const reviewPublication = mutation({
   args: {
@@ -263,6 +360,113 @@ export const reviewPublicationAccessRequest = mutation({
       console.error("Failed to review access request:", error);
       return { error: "Failed to review access request" };
     }
+  },
+});
+
+export const deletePublication = mutation({
+  args: {
+    publicationId: v.id("publications"),
+    token: v.string(),
+  },
+  handler: async (ctx, { publicationId, token }) => {
+    const permissions = await getPermissions(ctx, token);
+    if (!permissions) return { error: "Not authenticated" };
+
+    const publication = await ctx.db.get(publicationId);
+    if (!publication) return { error: "Publication not found" };
+
+    const isAuthor = publication.authorId === permissions.user._id;
+    const isAdmin = permissions.isGlobalAdmin();
+
+    if (!isAuthor && !isAdmin) {
+      return { error: "Insufficient permissions" };
+    }
+
+    try {
+
+      if (publication.featuredImage) {
+        try {
+          await ctx.storage.delete(publication.featuredImage);
+        } catch (error) {
+          console.warn("Failed to delete featured image:", error);
+        }
+      }
+
+      if (publication.attachments && publication.attachments.length > 0) {
+        for (const attachmentId of publication.attachments) {
+          try {
+            await ctx.storage.delete(attachmentId);
+          } catch (error) {
+            console.warn("Failed to delete attachment:", error);
+          }
+        }
+      }
+
+      const accessRequests = await ctx.db
+        .query("publicationAccessRequests")
+        .withIndex("by_publication", (q) => q.eq("publicationId", publicationId))
+        .collect();
+
+      for (const request of accessRequests) {
+        await ctx.db.delete(request._id);
+      }
+
+      const accessTokens = await ctx.db
+        .query("publicationAccessTokens")
+        .filter((q) => q.eq(q.field("publicationId"), publicationId))
+        .collect();
+
+      for (const token of accessTokens) {
+        await ctx.db.delete(token._id);
+      }
+
+      await ctx.db.delete(publicationId);
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting publication:", error);
+      return { error: "Failed to delete publication" };
+    }
+  },
+});
+
+export const getPublicationAccessRequests = query({
+  args: {
+    token: v.string(),
+    status: v.optional(v.union(v.literal("pending"), v.literal("approved"), v.literal("denied"))),
+  },
+  handler: async (ctx, { token, status }) => {
+    const permissions = await getPermissions(ctx, token);
+    if (!permissions?.isGlobalAdmin()) {
+      return { error: "Insufficient permissions" };
+    }
+
+    let requests;
+    if (status) {
+      requests = await ctx.db
+        .query("publicationAccessRequests")
+        .withIndex("by_status", (q) => q.eq("status", status))
+        .collect();
+    } else {
+      requests = await ctx.db
+        .query("publicationAccessRequests")
+        .collect();
+    }
+
+    const enrichedRequests = await Promise.all(
+      requests.map(async (request) => {
+        const publication = await ctx.db.get(request.publicationId);
+        const reviewer = request.reviewedBy ? await ctx.db.get(request.reviewedBy) : null;
+
+        return {
+          ...request,
+          publication,
+          reviewer,
+        };
+      })
+    );
+
+    return { data: enrichedRequests };
   },
 });
 

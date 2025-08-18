@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState, useMemo, useEffect } from "react";
+import Image from "next/image"
 import {
   Card,
   CardContent,
@@ -170,8 +171,8 @@ export default function PartnershipsPage() {
 
     return partnersQuery.page.filter((partner: Partner) => {
       if (statusFilter === "active" && !partner.isActive) return false;
-      if (statusFilter === "inactive" && partner.isActive) return false;
-      return true;
+      return !(statusFilter === "inactive" && partner.isActive);
+
     });
   }, [partnersQuery, statusFilter]);
 
@@ -460,10 +461,12 @@ export default function PartnershipsPage() {
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
                       <div className="flex-shrink-0">
                         {partner.logo ? (
-                          <img
+                          <Image
                             src={partner.logo}
                             alt={`${partner.name} logo`}
-                            className="h-12 w-12 object-contain rounded-lg border bg-white"
+                            width={48}
+                            height={48}
+                            className="object-contain rounded-lg border bg-white"
                           />
                         ) : (
                           <div className="h-12 w-12 bg-muted rounded-lg flex items-center justify-center">
@@ -798,10 +801,12 @@ export default function PartnershipsPage() {
             <div className="space-y-6">
               <div className="flex items-center space-x-4">
                 {viewingPartner.logo ? (
-                  <img
+                  <Image
                     src={viewingPartner.logo}
                     alt={`${viewingPartner.name} logo`}
-                    className="h-16 w-16 object-contain rounded-lg border bg-white"
+                    width={64}
+                    height={64}
+                    className="object-contain rounded-lg border bg-white"
                   />
                 ) : (
                   <div className="h-16 w-16 bg-muted rounded-lg flex items-center justify-center">

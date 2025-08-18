@@ -74,7 +74,7 @@ const FileUpload = ({
     return <FileText className="h-4 w-4" />;
   };
 
-  const validateFile = (file: File): string | null => {
+  const validateFile = useCallback((file: File): string | null => {
     if (file.size > maxSize * 1024 * 1024) {
       return `File size exceeds ${maxSize}MB limit`;
     }
@@ -100,9 +100,9 @@ const FileUpload = ({
     }
 
     return null;
-  };
+  }, [maxSize, accept]);
 
-  const uploadFile = async (file: File): Promise<UploadedFile | null> => {
+  const uploadFile = useCallback(async (file: File): Promise<UploadedFile | null> => {
     try {
       const uploadUrl = await generateUploadUrl();
 
@@ -148,9 +148,9 @@ const FileUpload = ({
       console.error('Upload error:', error);
       return null;
     }
-  };
+  }, [generateUploadUrl, saveFileRecord]);
 
-  const handleFiles = async (files: FileList) => {
+  const handleFiles = useCallback(async (files: FileList) => {
     if (disabled || isUploading) return;
 
     const fileArray = Array.from(files);
@@ -229,7 +229,7 @@ const FileUpload = ({
     } finally {
       setIsUploading(false);
     }
-  };
+  }, [disabled, isUploading, currentFiles, maxFiles, onError, onFilesChange, uploadFile, validateFile]);
 
   const handleRemoveFile = async (fileId: Id<"_storage">) => {
     if (disabled) return;
