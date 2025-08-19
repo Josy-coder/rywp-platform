@@ -94,7 +94,8 @@ interface Project {
   theme: string;
   hubId: Id<"hubs">;
   partnerIds: Id<"partners">[];
-  featuredImage?: Id<"_storage">;
+  featuredImageId?: Id<"_storage">; // Storage ID for file management
+  featuredImage?: string | null; // URL for display
   startDate: number;
   endDate?: number;
   isFeatured: boolean;
@@ -108,9 +109,10 @@ interface Project {
     name: string;
     description: string;
     objectives: string;
-    termsOfReference?: Id<"_storage">;
+    termsOfReference?: string | null; // URL for display
     membershipFormFields: any[];
-    image?: Id<"_storage">;
+    imageId?: Id<"_storage">; // Storage ID for file management
+    image?: string | null; // URL for display
     isActive: boolean;
     createdAt: number;
     createdBy: Id<"users">;
@@ -120,7 +122,8 @@ interface Project {
     _creationTime: number;
     name: string;
     website?: string;
-    logo?: Id<"_storage">;
+    logoId?: Id<"_storage">; // Storage ID for file management
+    logo?: string | null; // URL for display
     description?: string;
     isActive: boolean;
     createdAt: number;
@@ -137,7 +140,8 @@ interface Hub {
 interface Partner {
   _id: Id<"partners">;
   name: string;
-  logo?: Id<"_storage">;
+  logoId?: Id<"_storage">; // Storage ID for file management
+  logo?: string | null; // URL for display
   isActive: boolean;
 }
 
@@ -251,14 +255,15 @@ const ProjectsPageContent = () => {
         coordinates: projectToEdit.coordinates || { lat: 0, lng: 0 },
       });
       setProjectImage(
-        projectToEdit.featuredImage
+        projectToEdit.featuredImage && projectToEdit.featuredImageId
           ? [
             {
-              _id: projectToEdit.featuredImage,
+              _id: projectToEdit.featuredImageId,
               name: "Current Image",
               size: 0,
               type: "image/*",
-              storageId: projectToEdit.featuredImage,
+              storageId: projectToEdit.featuredImageId,
+              url: projectToEdit.featuredImage,
             },
           ]
           : []
@@ -520,7 +525,7 @@ const ProjectsPageContent = () => {
             <Skeleton className="h-10 w-32" />
           </div>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <ProjectCardSkeleton key={i} />
           ))}
@@ -629,7 +634,7 @@ const ProjectsPageContent = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {filteredProjects.map((project: Project) => (
               <Card key={project._id} className="overflow-hidden transition-all hover:shadow-md">
                 <div className="aspect-video relative">
@@ -637,11 +642,10 @@ const ProjectsPageContent = () => {
                     <Image
                       src={project.featuredImage}
                       alt={project.title}
-                      layout="responsive"
-                      width={700}
-                      height={475}
+                      fill
                       className="object-cover w-full h-full"
-                      />
+                      sizes="(max-width: 768px) 100vw, 700px"
+                    />
                   ) : (
                     <div className="w-full h-full bg-muted flex items-center justify-center">
                       <ImageIcon className="h-8 w-8 text-muted-foreground" />
@@ -656,6 +660,7 @@ const ProjectsPageContent = () => {
                     </div>
                   )}
                 </div>
+
 
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
@@ -701,14 +706,15 @@ const ProjectsPageContent = () => {
                                 coordinates: project.coordinates || { lat: 0, lng: 0 },
                               });
                               setProjectImage(
-                                project.featuredImage
+                                project.featuredImage && project.featuredImageId
                                   ? [
                                     {
-                                      _id: project.featuredImage,
+                                      _id: project.featuredImageId,
                                       name: "Current Image",
                                       size: 0,
                                       type: "image/*",
-                                      storageId: project.featuredImage,
+                                      storageId: project.featuredImageId,
+                                      url: project.featuredImage,
                                     },
                                   ]
                                   : []
@@ -780,7 +786,7 @@ const ProjectsPageContent = () => {
 
       
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
             <DialogDescription>
@@ -789,14 +795,14 @@ const ProjectsPageContent = () => {
           </DialogHeader>
 
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3">
               <TabsTrigger value="basic">Basic Info</TabsTrigger>
               <TabsTrigger value="details">Details</TabsTrigger>
               <TabsTrigger value="media">Media</TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <Label htmlFor="title">Project Title *</Label>
                   <Input
@@ -860,7 +866,7 @@ const ProjectsPageContent = () => {
             </TabsContent>
 
             <TabsContent value="details" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="theme">Theme *</Label>
                   <Input
@@ -984,7 +990,7 @@ const ProjectsPageContent = () => {
                 onError={(error) => setError(error)}
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="lat">Latitude (Optional)</Label>
                   <Input
@@ -1052,7 +1058,7 @@ const ProjectsPageContent = () => {
 
       
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
           <DialogHeader>
             <DialogTitle>Edit Project</DialogTitle>
             <DialogDescription>
@@ -1061,14 +1067,14 @@ const ProjectsPageContent = () => {
           </DialogHeader>
 
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3">
               <TabsTrigger value="basic">Basic Info</TabsTrigger>
               <TabsTrigger value="details">Details</TabsTrigger>
               <TabsTrigger value="media">Media</TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <Label htmlFor="edit-title">Project Title *</Label>
                   <Input
@@ -1133,7 +1139,7 @@ const ProjectsPageContent = () => {
             </TabsContent>
 
             <TabsContent value="details" className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="edit-theme">Theme *</Label>
                   <Input
@@ -1257,7 +1263,7 @@ const ProjectsPageContent = () => {
                 onError={(error) => setError(error)}
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="edit-lat">Latitude (Optional)</Label>
                   <Input

@@ -43,7 +43,15 @@ export const getFormFiles = query({
     }
 
     const files = await query.collect();
-    return { data: files };
+    
+    const filesWithUrls = await Promise.all(
+      files.map(async (file) => ({
+        ...file,
+        fileId: await ctx.storage.getUrl(file.fileId),
+      }))
+    );
+    
+    return { data: filesWithUrls };
   },
 });
 

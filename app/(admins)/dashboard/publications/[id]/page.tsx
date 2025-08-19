@@ -45,8 +45,8 @@ interface Publication {
   authorId: Id<"users">;
   status: "draft" | "pending" | "published";
   publishedAt?: number;
-  featuredImage?: Id<"_storage">;
-  attachments: Id<"_storage">[];
+  featuredImage?: string | null; // URL for display
+  attachments: (string | null)[]; // URLs for display
   tags: string[];
   isRestrictedAccess: boolean;
   createdAt: number;
@@ -55,7 +55,8 @@ interface Publication {
     _id: Id<"users">;
     name: string;
     email: string;
-  };
+    profileImage?: string | null; // URL for display
+  } | null;
   approver?: {
     _id: Id<"users">;
     name: string;
@@ -169,7 +170,7 @@ export default function PublicationDetailsPage() {
     };
 
     const handleReviewPublication = async (status: "published" | "rejected") => {
-      if (!user?.isGlobalAdmin || !publication) return;
+      if (!user?.isGlobalAdmin || !currentToken || !publication) return;
 
       try {
         const result = await reviewPublication({
@@ -219,7 +220,7 @@ export default function PublicationDetailsPage() {
       );
     }
 
-    const canEdit = publication.authorId === user?._id || user?.isGlobalAdmin;
+    const canEdit = publication.authorId === user?.id || user?.isGlobalAdmin;
     const canReview = user?.isGlobalAdmin && publication.status === "pending";
 
     return (
@@ -275,10 +276,8 @@ export default function PublicationDetailsPage() {
                 <Image
                   src={publication.featuredImage}
                   alt={publication.title}
-                  layout="responsive"
-                  width={700}
-                  height={475}
-                  className="object-cover w-full h-full"
+                  fill
+                  className="object-cover"
                 />
                 {publication.isRestrictedAccess && (
                   <div className="absolute top-4 right-4">
@@ -357,9 +356,9 @@ export default function PublicationDetailsPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {publication.attachments.map((attachmentId, index) => (
+                      {publication.attachments.filter(Boolean).map((attachmentUrl, index) => (
                         <div
-                          key={attachmentId}
+                          key={attachmentUrl!}
                           className="flex items-center justify-between p-3 border rounded-lg bg-muted/30"
                         >
                           <div className="flex items-center space-x-3">
@@ -375,7 +374,7 @@ export default function PublicationDetailsPage() {
                           </div>
                           <Button variant="outline" size="sm" asChild>
                             <a
-                              href={attachmentId}
+                              href={attachmentUrl!}
                               download
                               target="_blank"
                               rel="noopener noreferrer"

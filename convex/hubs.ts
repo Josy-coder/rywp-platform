@@ -25,7 +25,12 @@ export const getHubs = query({
           .collect()
           .then(members => members.length);
 
-        return { ...hub, memberCount };
+        return { 
+          ...hub, 
+          memberCount,
+          image: hub.image ? await ctx.storage.getUrl(hub.image) : null,
+          termsOfReference: hub.termsOfReference ? await ctx.storage.getUrl(hub.termsOfReference) : null,
+        };
       })
     );
 
@@ -48,11 +53,24 @@ export const getHub = query({
     const membersWithUsers = await Promise.all(
       members.map(async (membership) => {
         const user = await ctx.db.get(membership.userId);
-        return { ...membership, user };
+        return { 
+          ...membership, 
+          user: user ? {
+            ...user,
+            profileImage: user.profileImage ? await ctx.storage.getUrl(user.profileImage) : null,
+          } : null,
+        };
       })
     );
 
-    return { data: { ...hub, members: membersWithUsers } };
+    return { 
+      data: { 
+        ...hub, 
+        image: hub.image ? await ctx.storage.getUrl(hub.image) : null,
+        termsOfReference: hub.termsOfReference ? await ctx.storage.getUrl(hub.termsOfReference) : null,
+        members: membersWithUsers 
+      } 
+    };
   },
 });
 

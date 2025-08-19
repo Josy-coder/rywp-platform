@@ -55,8 +55,8 @@ export default function DashboardPage() {
 
   if (statsQuery === undefined) {
     return (
-      <div className="space-y-6">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="space-y-4 sm:space-y-6">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <Card key={i}>
               <CardHeader className="pb-2">
@@ -66,9 +66,9 @@ export default function DashboardPage() {
             </Card>
           ))}
         </div>
-        <div className="grid gap-6 md:grid-cols-2">
-          <Skeleton className="h-80" />
-          <Skeleton className="h-80" />
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
+          <Skeleton className="h-60 sm:h-80" />
+          <Skeleton className="h-60 sm:h-80" />
         </div>
       </div>
     );
@@ -157,20 +157,20 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600">Welcome back, {user.name}</p>
         </div>
-        <Badge variant="outline" className="text-sm">
+        <Badge variant="outline" className="text-sm w-fit">
           {user.isSuperAdmin ? "Super Admin" : user.isGlobalAdmin ? "Admin" : "Member"}
         </Badge>
       </div>
 
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Members"
           value={stats.activeUsers}
@@ -199,7 +199,7 @@ export default function DashboardPage() {
       </div>
 
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Pending Applications"
           value={stats.pendingApplications}
@@ -267,26 +267,29 @@ export default function DashboardPage() {
             <CardDescription>Published content distribution</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={publicationsChartConfig} className="min-h-[300px] w-full">
-              <BarChart data={stats.publicationsByType}>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="type"
-                  tickLine={false}
-                  tickMargin={10}
-                  axisLine={false}
-                  tickFormatter={(value) => value.slice(0, 10)}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="count" fill="var(--color-count)" radius={4} />
-              </BarChart>
-            </ChartContainer>
+            <div className="overflow-x-auto">
+              <ChartContainer config={publicationsChartConfig} className="min-h-[200px] sm:min-h-[300px] w-full min-w-[300px]">
+                <BarChart data={stats.publicationsByType}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="type"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                    tickFormatter={(value) => value.slice(0, 8)}
+                    tick={{ fontSize: 11 }}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="count" fill="var(--color-count)" radius={4} />
+                </BarChart>
+              </ChartContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         
         <Card>
           <CardHeader>
@@ -294,32 +297,35 @@ export default function DashboardPage() {
             <CardDescription>New members and projects over time</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={growthChartConfig} className="min-h-[300px] w-full">
-              <LineChart data={stats.monthlyGrowth}>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Line
-                  dataKey="members"
-                  type="monotone"
-                  stroke="var(--color-members)"
-                  strokeWidth={2}
-                  dot={false}
-                />
-                <Line
-                  dataKey="projects"
-                  type="monotone"
-                  stroke="var(--color-projects)"
-                  strokeWidth={2}
-                  dot={false}
-                />
-              </LineChart>
-            </ChartContainer>
+            <div className="overflow-x-auto">
+              <ChartContainer config={growthChartConfig} className="min-h-[200px] sm:min-h-[300px] w-full min-w-[300px]">
+                <LineChart data={stats.monthlyGrowth}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="month"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    tick={{ fontSize: 11 }}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Line
+                    dataKey="members"
+                    type="monotone"
+                    stroke="var(--color-members)"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                  <Line
+                    dataKey="projects"
+                    type="monotone"
+                    stroke="var(--color-projects)"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
+              </ChartContainer>
+            </div>
           </CardContent>
         </Card>
 
@@ -330,25 +336,28 @@ export default function DashboardPage() {
             <CardDescription>Members distribution across hubs</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={hubsChartConfig} className="min-h-[300px] w-full">
-              <BarChart
-                data={stats.hubMembershipStats}
-                layout="horizontal"
-                margin={{ left: 100 }}
-              >
-                <CartesianGrid horizontal={false} />
-                <YAxis
-                  dataKey="hubName"
-                  type="category"
-                  tickLine={false}
-                  axisLine={false}
-                  width={80}
-                />
-                <XAxis type="number" />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="memberCount" fill="var(--color-memberCount)" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ChartContainer>
+            <div className="overflow-x-auto">
+              <ChartContainer config={hubsChartConfig} className="min-h-[200px] sm:min-h-[300px] w-full min-w-[300px]">
+                <BarChart
+                  data={stats.hubMembershipStats}
+                  layout="horizontal"
+                  margin={{ left: 40, right: 10, top: 10, bottom: 10 }}
+                >
+                  <CartesianGrid horizontal={false} />
+                  <YAxis
+                    dataKey="hubName"
+                    type="category"
+                    tickLine={false}
+                    axisLine={false}
+                    width={50}
+                    tick={{ fontSize: 10 }}
+                  />
+                  <XAxis type="number" tick={{ fontSize: 10 }} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="memberCount" fill="var(--color-memberCount)" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ChartContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -360,7 +369,7 @@ export default function DashboardPage() {
           <CardDescription>Summary of recent platform activity</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <div className="text-2xl font-bold text-blue-600">{stats.recentUsers}</div>
               <div className="text-sm text-gray-600">New Members</div>

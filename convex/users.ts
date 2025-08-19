@@ -11,7 +11,13 @@ export const getCurrentUser = query({
       return { error: "Not authenticated" };
     }
 
-    return await ctx.db.get(permissions.user._id);
+    const user = await ctx.db.get(permissions.user._id);
+    if (!user) return null;
+
+    return {
+      ...user,
+      profileImage: user.profileImage ? await ctx.storage.getUrl(user.profileImage) : null,
+    };
   },
 });
 
@@ -107,15 +113,29 @@ export const getTeamMembers = query({
     const members = await membersQuery.collect();
 
     if (args.category === "all") {
+      const membersWithUrls = await Promise.all(
+        members.map(async (member) => ({
+          ...member,
+          profileImage: member.profileImage ? await ctx.storage.getUrl(member.profileImage) : null,
+        }))
+      );
+
       const grouped = {
-        founding: members.filter(m => m.teamCategory === "founding"),
-        hub_management: members.filter(m => m.teamCategory === "hub_management"),
-        staff: members.filter(m => m.teamCategory === "staff"),
+        founding: membersWithUrls.filter(m => m.teamCategory === "founding"),
+        hub_management: membersWithUrls.filter(m => m.teamCategory === "hub_management"),
+        staff: membersWithUrls.filter(m => m.teamCategory === "staff"),
       };
       return { data: grouped };
     }
 
-    return { data: members };
+    const membersWithUrls = await Promise.all(
+      members.map(async (member) => ({
+        ...member,
+        profileImage: member.profileImage ? await ctx.storage.getUrl(member.profileImage) : null,
+      }))
+    );
+
+    return { data: membersWithUrls };
   },
 });
 

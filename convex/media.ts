@@ -67,9 +67,19 @@ export const getMediaItems = query({
 
         return {
           ...item,
-          uploader,
-          event,
-          project,
+          fileId: await ctx.storage.getUrl(item.fileId),
+          uploader: uploader ? {
+            ...uploader,
+            profileImage: uploader.profileImage ? await ctx.storage.getUrl(uploader.profileImage) : null,
+          } : null,
+          event: event ? {
+            ...event,
+            featuredImage: event.featuredImage ? await ctx.storage.getUrl(event.featuredImage) : null,
+          } : null,
+          project: project ? {
+            ...project,
+            featuredImage: project.featuredImage ? await ctx.storage.getUrl(project.featuredImage) : null,
+          } : null,
         };
       })
     );

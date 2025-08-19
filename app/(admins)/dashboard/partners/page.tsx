@@ -75,7 +75,8 @@ interface Partner {
   _id: string;
   name: string;
   website?: string;
-  logo?: string;
+  logoId?: Id<"_storage">; // Storage ID for file management
+  logo?: string | null; // URL for display
   description?: string;
   isActive: boolean;
   createdAt: number;
@@ -515,15 +516,17 @@ export default function PartnershipsPage() {
                               website: partner.website || "",
                               description: partner.description || "",
                             });
+                            // Populate current logo for editing
                             setPartnerLogo(
-                              partner.logo
+                              partner.logo && partner.logoId
                                 ? [
                                   {
-                                    _id: partner.logo,
+                                    _id: partner.logoId,
                                     name: "Current Logo",
                                     size: 0,
                                     type: "image/*",
-                                    storageId: partner.logo,
+                                    storageId: partner.logoId,
+                                    url: partner.logo,
                                   },
                                 ]
                                 : []

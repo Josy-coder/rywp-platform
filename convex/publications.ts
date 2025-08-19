@@ -54,10 +54,27 @@ export const getPublications = query({
         const author = await ctx.db.get(pub.authorId);
         const approver = pub.approvedBy ? await ctx.db.get(pub.approvedBy) : null;
 
+        const attachmentUrls = await Promise.all(
+          pub.attachments.map(async (attachmentId) => 
+            await ctx.storage.getUrl(attachmentId)
+          )
+        );
+
         return {
           ...pub,
-          author,
-          approver,
+          featuredImageId: pub.featuredImage,
+          featuredImage: pub.featuredImage ? await ctx.storage.getUrl(pub.featuredImage) : null,
+          attachmentIds: pub.attachments,
+          attachments: attachmentUrls,
+          author: author ? {
+            ...author,
+            profileImageId: author.profileImage,
+            profileImage: author.profileImage ? await ctx.storage.getUrl(author.profileImage) : null,
+          } : null,
+          approver: approver ? {
+            ...approver,
+            profileImage: approver.profileImage ? await ctx.storage.getUrl(approver.profileImage) : null,
+          } : null,
         };
       })
     );
@@ -75,11 +92,27 @@ export const getPublication = query({
     const author = await ctx.db.get(publication.authorId);
     const approver = publication.approvedBy ? await ctx.db.get(publication.approvedBy) : null;
 
+    const attachmentUrls = await Promise.all(
+      publication.attachments.map(async (attachmentId) => 
+        await ctx.storage.getUrl(attachmentId)
+      )
+    );
+
     return {
       data: {
         ...publication,
-        author,
-        approver,
+        featuredImageId: publication.featuredImage,
+        featuredImage: publication.featuredImage ? await ctx.storage.getUrl(publication.featuredImage) : null,
+        attachmentIds: publication.attachments,
+        attachments: attachmentUrls,
+        author: author ? {
+          ...author,
+          profileImage: author.profileImage ? await ctx.storage.getUrl(author.profileImage) : null,
+        } : null,
+        approver: approver ? {
+          ...approver,
+          profileImage: approver.profileImage ? await ctx.storage.getUrl(approver.profileImage) : null,
+        } : null,
       }
     };
   },
@@ -111,7 +144,25 @@ export const getPublishedPublications = query({
     const enrichedPublications = await Promise.all(
       limitedResults.map(async (pub) => {
         const author = await ctx.db.get(pub.authorId);
-        return { ...pub, author };
+        
+        const attachmentUrls = await Promise.all(
+          pub.attachments.map(async (attachmentId) => 
+            await ctx.storage.getUrl(attachmentId)
+          )
+        );
+        
+        return { 
+          ...pub, 
+          featuredImageId: pub.featuredImage,
+          featuredImage: pub.featuredImage ? await ctx.storage.getUrl(pub.featuredImage) : null,
+          attachmentIds: pub.attachments,
+          attachments: attachmentUrls,
+          author: author ? {
+            ...author,
+            profileImageId: author.profileImage,
+            profileImage: author.profileImage ? await ctx.storage.getUrl(author.profileImage) : null,
+          } : null,
+        };
       })
     );
 

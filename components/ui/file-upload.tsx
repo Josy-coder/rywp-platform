@@ -110,12 +110,10 @@ const FileUpload = ({
         throw new Error('Failed to generate upload URL');
       }
 
-      const formData = new FormData();
-      formData.append('file', file);
-
       const response = await fetch(uploadUrl, {
         method: 'POST',
-        body: formData,
+        headers: { "Content-Type": file.type },
+        body: file,
       });
 
       if (!response.ok) {

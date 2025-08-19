@@ -145,7 +145,7 @@ export function Sidebar({ isCollapsed = false, isMobileOpen, onMobileClose }: Si
 
       <aside
         className={cn(
-          "bg-white border-r border-gray-200 transition-all duration-500 ease-in-out overflow-hidden shadow-sm",
+          "hidden md:block bg-white border-r border-gray-200 transition-all duration-500 ease-in-out overflow-hidden shadow-sm",
           isCollapsed ? "w-20" : "w-64",
           "h-full"
         )}

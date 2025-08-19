@@ -71,10 +71,26 @@ export const getProjects = query({
           project.partnerIds.map(id => ctx.db.get(id))
         );
 
+        const partnersWithUrls = await Promise.all(
+          partners.filter(Boolean).map(async (partner) => ({
+            ...partner!,
+            logoId: partner!.logo,
+            logo: partner!.logo ? await ctx.storage.getUrl(partner!.logo) : null,
+          }))
+        );
+
         return {
           ...project,
-          hub,
-          partners: partners.filter(Boolean),
+          featuredImageId: project.featuredImage,
+          featuredImage: project.featuredImage ? await ctx.storage.getUrl(project.featuredImage) : null,
+          hub: hub ? {
+            ...hub,
+            imageId: hub.image,
+            image: hub.image ? await ctx.storage.getUrl(hub.image) : null,
+            termsOfReferenceId: hub.termsOfReference,
+            termsOfReference: hub.termsOfReference ? await ctx.storage.getUrl(hub.termsOfReference) : null,
+          } : null,
+          partners: partnersWithUrls,
         };
       })
     );
@@ -95,12 +111,28 @@ export const getProject = query({
     );
     const creator = await ctx.db.get(project.createdBy);
 
+    const partnersWithUrls = await Promise.all(
+      partners.filter(Boolean).map(async (partner) => ({
+        ...partner!,
+        logo: partner!.logo ? await ctx.storage.getUrl(partner!.logo) : null,
+      }))
+    );
+
     return {
       data: {
         ...project,
-        hub,
-        partners: partners.filter(Boolean),
-        creator,
+        featuredImage: project.featuredImage ? await ctx.storage.getUrl(project.featuredImage) : null,
+        hub: hub ? {
+          ...hub,
+          image: hub.image ? await ctx.storage.getUrl(hub.image) : null,
+          termsOfReference: hub.termsOfReference ? await ctx.storage.getUrl(hub.termsOfReference) : null,
+        } : null,
+        partners: partnersWithUrls,
+        creator: creator ? {
+          ...creator,
+          profileImageId: creator.profileImage,
+          profileImage: creator.profileImage ? await ctx.storage.getUrl(creator.profileImage) : null,
+        } : null,
       }
     };
   },
@@ -254,10 +286,22 @@ export const getProjectsByTheme = query({
         project.partnerIds.map(id => ctx.db.get(id))
       );
 
+      const partnersWithUrls = await Promise.all(
+        partners.filter(Boolean).map(async (partner) => ({
+          ...partner!,
+          logo: partner!.logo ? await ctx.storage.getUrl(partner!.logo) : null,
+        }))
+      );
+
       projectsByTheme[project.theme].push({
         ...project,
-        hub,
-        partners: partners.filter(Boolean),
+        featuredImage: project.featuredImage ? await ctx.storage.getUrl(project.featuredImage) : null,
+        hub: hub ? {
+          ...hub,
+          image: hub.image ? await ctx.storage.getUrl(hub.image) : null,
+          termsOfReference: hub.termsOfReference ? await ctx.storage.getUrl(hub.termsOfReference) : null,
+        } : null,
+        partners: partnersWithUrls,
       });
     }
 
@@ -282,10 +326,26 @@ export const getFeaturedProjects = query({
           project.partnerIds.map(id => ctx.db.get(id))
         );
 
+        const partnersWithUrls = await Promise.all(
+          partners.filter(Boolean).map(async (partner) => ({
+            ...partner!,
+            logoId: partner!.logo,
+            logo: partner!.logo ? await ctx.storage.getUrl(partner!.logo) : null,
+          }))
+        );
+
         return {
           ...project,
-          hub,
-          partners: partners.filter(Boolean),
+          featuredImageId: project.featuredImage,
+          featuredImage: project.featuredImage ? await ctx.storage.getUrl(project.featuredImage) : null,
+          hub: hub ? {
+            ...hub,
+            imageId: hub.image,
+            image: hub.image ? await ctx.storage.getUrl(hub.image) : null,
+            termsOfReferenceId: hub.termsOfReference,
+            termsOfReference: hub.termsOfReference ? await ctx.storage.getUrl(hub.termsOfReference) : null,
+          } : null,
+          partners: partnersWithUrls,
         };
       })
     );

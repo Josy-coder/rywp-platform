@@ -37,11 +37,58 @@ export const getCareerOpportunities = query({
     const enrichedOpportunities = await Promise.all(
       opportunities.map(async (opp) => {
         const creator = await ctx.db.get(opp.createdBy);
-        return { ...opp, creator };
+        
+        const attachmentUrls = await Promise.all(
+          opp.attachments.map(async (attachmentId) => 
+            await ctx.storage.getUrl(attachmentId)
+          )
+        );
+        
+        return { 
+          ...opp, 
+          attachmentIds: opp.attachments,
+          attachments: attachmentUrls,
+          creator: creator ? {
+            ...creator,
+            profileImageId: creator.profileImage,
+            profileImage: creator.profileImage ? await ctx.storage.getUrl(creator.profileImage) : null,
+          } : null,
+        };
       })
     );
 
     return { data: enrichedOpportunities };
+  },
+});
+
+export const getCareerOpportunity = query({
+  args: { opportunityId: v.id("careerOpportunities") },
+  handler: async (ctx, { opportunityId }) => {
+    const opportunity = await ctx.db.get(opportunityId);
+    if (!opportunity || !opportunity.isActive) {
+      return { error: "Career opportunity not found" };
+    }
+
+    const creator = await ctx.db.get(opportunity.createdBy);
+    
+    const attachmentUrls = await Promise.all(
+      opportunity.attachments.map(async (attachmentId) => 
+        await ctx.storage.getUrl(attachmentId)
+      )
+    );
+
+    const enrichedOpportunity = {
+      ...opportunity,
+      attachmentIds: opportunity.attachments,
+      attachments: attachmentUrls,
+      creator: creator ? {
+        ...creator,
+        profileImageId: creator.profileImage,
+        profileImage: creator.profileImage ? await ctx.storage.getUrl(creator.profileImage) : null,
+      } : null,
+    };
+
+    return { data: enrichedOpportunity };
   },
 });
 
@@ -95,6 +142,7 @@ export const updateCareerOpportunity = mutation({
     applicationDeadline: v.optional(v.number()),
     contactEmail: v.optional(v.string()),
     applicationLink: v.optional(v.string()),
+    attachments: v.optional(v.array(v.id("_storage"))),
     isActive: v.optional(v.boolean()),
   },
   handler: async (ctx, { opportunityId, token, ...updates }) => {
@@ -104,11 +152,94 @@ export const updateCareerOpportunity = mutation({
     }
 
     try {
+      // Handle attachment cleanup if new attachments are provided
+      const currentOpportunity = await ctx.db.get(opportunityId);
+      if (updates.attachments && currentOpportunity && currentOpportunity.attachments) {
+        const oldAttachments = currentOpportunity.attachments;
+        const newAttachments = updates.attachments;
+        const attachmentsToDelete = oldAttachments.filter(id => !newAttachments.includes(id));
+
+        for (const attachmentId of attachmentsToDelete) {
+          try {
+            await ctx.storage.delete(attachmentId);
+          } catch (error) {
+            console.warn("Failed to delete old attachment:", error);
+          }
+        }
+      }
+
       await ctx.db.patch(opportunityId, updates);
       return { success: true };
     } catch (error) {
       console.error("Failed to update career opportunity:", error);
       return { error: "Failed to update career opportunity" };
+    }
+  },
+});
+
+export const deleteCareerOpportunity = mutation({
+  args: {
+    opportunityId: v.id("careerOpportunities"),
+    token: v.string(),
+  },
+  handler: async (ctx, { opportunityId, token }) => {
+    const permissions = await getPermissions(ctx, token);
+    if (!permissions?.isGlobalAdmin()) {
+      return { error: "Insufficient permissions" };
+    }
+
+    const opportunity = await ctx.db.get(opportunityId);
+    if (!opportunity) {
+      return { error: "Career opportunity not found" };
+    }
+
+    try {
+      await ctx.db.patch(opportunityId, {
+        isActive: false,
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting career opportunity:", error);
+      return { error: "Failed to delete career opportunity" };
+    }
+  },
+});
+
+export const permanentlyDeleteCareerOpportunity = mutation({
+  args: {
+    opportunityId: v.id("careerOpportunities"),
+    token: v.string(),
+  },
+  handler: async (ctx, { opportunityId, token }) => {
+    const permissions = await getPermissions(ctx, token);
+    if (!permissions?.isGlobalAdmin()) {
+      return { error: "Insufficient permissions" };
+    }
+
+    const opportunity = await ctx.db.get(opportunityId);
+    if (!opportunity) {
+      return { error: "Career opportunity not found" };
+    }
+
+    try {
+      // Delete attachments from storage
+      if (opportunity.attachments && opportunity.attachments.length > 0) {
+        for (const attachmentId of opportunity.attachments) {
+          try {
+            await ctx.storage.delete(attachmentId);
+          } catch (error) {
+            console.warn("Failed to delete attachment:", error);
+          }
+        }
+      }
+
+      await ctx.db.delete(opportunityId);
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error permanently deleting career opportunity:", error);
+      return { error: "Failed to permanently delete career opportunity" };
     }
   },
 });

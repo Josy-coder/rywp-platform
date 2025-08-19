@@ -3,7 +3,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -92,8 +92,10 @@ interface Publication {
   authorId: Id<"users">;
   status: "draft" | "pending" | "published";
   publishedAt?: number;
-  featuredImage?: Id<"_storage">;
-  attachments: Id<"_storage">[];
+  featuredImageId?: Id<"_storage">; // Storage ID for file management
+  featuredImage?: string | null;
+  attachmentIds: Id<"_storage">[]; // Storage IDs for file management
+  attachments: (string | null)[];
   tags: string[];
   isRestrictedAccess: boolean;
   createdAt: number;
@@ -102,7 +104,9 @@ interface Publication {
     _id: Id<"users">;
     name: string;
     email: string;
-  };
+    profileImageId?: Id<"_storage">; // Storage ID for file management
+    profileImage?: string | null; // URL for display
+  } | null;
   approver?: {
     _id: Id<"users">;
     name: string;
@@ -148,7 +152,7 @@ function PublicationCardSkeleton() {
   );
 }
 
-export default function PublicationsPage() {
+function PublicationsPageContent() {
   const { user, currentToken } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -197,7 +201,7 @@ export default function PublicationsPage() {
     const publicationToEdit = publicationsQuery.data.find((p: Publication) => p._id === editParam);
     if (publicationToEdit) {
 
-      const canEdit = publicationToEdit.authorId === user._id || user.isGlobalAdmin;
+      const canEdit = publicationToEdit.authorId === user.id || user.isGlobalAdmin;
 
       if (canEdit) {
         setEditingPublication(publicationToEdit);
@@ -208,28 +212,34 @@ export default function PublicationsPage() {
           tags: publicationToEdit.tags,
           isRestrictedAccess: publicationToEdit.isRestrictedAccess,
         });
+
+
+        // Populate current files for editing
         setFeaturedImage(
-          publicationToEdit.featuredImage
+          publicationToEdit.featuredImage && publicationToEdit.featuredImageId
             ? [
               {
-                _id: publicationToEdit.featuredImage,
+                _id: publicationToEdit.featuredImageId,
                 name: "Current Image",
                 size: 0,
                 type: "image/*",
-                storageId: publicationToEdit.featuredImage,
+                storageId: publicationToEdit.featuredImageId,
+                url: publicationToEdit.featuredImage,
               },
             ]
             : []
         );
-        setAttachments(
-          publicationToEdit.attachments.map(id => ({
-            _id: id,
-            name: "Current File",
-            size: 0,
-            type: "application/*",
-            storageId: id,
-          }))
-        );
+        
+        // Set up attachments using both IDs and URLs
+        const currentAttachments = publicationToEdit.attachmentIds.map((id, index) => ({
+          _id: id,
+          name: `Attachment ${index + 1}`,
+          size: 0,
+          type: "application/pdf",
+          storageId: id,
+          url: publicationToEdit.attachments[index] || undefined,
+        }));
+        setAttachments(currentAttachments);
         setShowEditDialog(true);
 
         const newParams = new URLSearchParams(searchParams);
@@ -492,7 +502,7 @@ export default function PublicationsPage() {
             <Skeleton className="h-10 w-32" />
           </div>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <PublicationCardSkeleton key={i} />
           ))}
@@ -585,7 +595,7 @@ export default function PublicationsPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {filteredPublications.map((publication: Publication) => (
               <Card key={publication._id} className="overflow-hidden transition-all hover:shadow-md">
                 <div className="aspect-[16/10] relative">
@@ -593,10 +603,8 @@ export default function PublicationsPage() {
                     <Image
                       src={publication.featuredImage}
                       alt={publication.title}
-                      layout="responsive"
-                      width={700}
-                      height={475}
-                      className="object-cover w-full h-full"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <div className="w-full h-full bg-muted flex items-center justify-center">
@@ -639,7 +647,7 @@ export default function PublicationsPage() {
                             View Details
                           </Link>
                         </DropdownMenuItem>
-                        {(publication.authorId === user._id || user.isGlobalAdmin) && (
+                        {(publication.authorId === user.id || user.isGlobalAdmin) && (
                           <DropdownMenuItem
                             onClick={() => {
                               setEditingPublication(publication);
@@ -650,28 +658,34 @@ export default function PublicationsPage() {
                                 tags: publication.tags,
                                 isRestrictedAccess: publication.isRestrictedAccess,
                               });
+
+
+                              // Populate current files for editing
                               setFeaturedImage(
-                                publication.featuredImage
+                                publication.featuredImage && publication.featuredImageId
                                   ? [
                                     {
-                                      _id: publication.featuredImage,
+                                      _id: publication.featuredImageId,
                                       name: "Current Image",
                                       size: 0,
                                       type: "image/*",
-                                      storageId: publication.featuredImage,
+                                      storageId: publication.featuredImageId,
+                                      url: publication.featuredImage,
                                     },
                                   ]
                                   : []
                               );
-                              setAttachments(
-                                publication.attachments.map(id => ({
-                                  _id: id,
-                                  name: "Current File",
-                                  size: 0,
-                                  type: "application/*",
-                                  storageId: id,
-                                }))
-                              );
+                              
+                              // Set up attachments using both IDs and URLs
+                              const currentAttachments = publication.attachmentIds.map((id, index) => ({
+                                _id: id,
+                                name: `Attachment ${index + 1}`,
+                                size: 0,
+                                type: "application/pdf",
+                                storageId: id,
+                                url: publication.attachments[index] || undefined,
+                              }));
+                              setAttachments(currentAttachments);
                               setShowEditDialog(true);
                             }}
                           >
@@ -685,7 +699,7 @@ export default function PublicationsPage() {
                             Download Files
                           </DropdownMenuItem>
                         )}
-                        {(publication.authorId === user._id || user.isGlobalAdmin) && (
+                        {(publication.authorId === user.id || user.isGlobalAdmin) && (
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -1141,5 +1155,13 @@ export default function PublicationsPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+export default function PublicationsPage() {
+  return (
+    <Suspense fallback={<PublicationCardSkeleton />}>
+      <PublicationsPageContent />
+    </Suspense>
   );
 }

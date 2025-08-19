@@ -589,14 +589,14 @@ export default function MembershipPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Membership Management</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Membership Management</h1>
           <p className="text-gray-600">
             Manage membership applications and existing members
           </p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Dialog open={showAddMemberDialog} onOpenChange={setShowAddMemberDialog}>
             <DialogTrigger asChild>
               <Button variant="outline">
@@ -630,20 +630,20 @@ export default function MembershipPage() {
         </TabsList>
 
         <TabsContent value="applications" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Membership Applications</h2>
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h2 className="text-lg sm:text-xl font-semibold">Membership Applications</h2>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   placeholder="Search applications..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-64"
+                  className="pl-10 w-full sm:w-64"
                 />
               </div>
               <Select value={statusFilter} onValueChange={(value: "pending" | "approved" | "rejected") => setStatusFilter(value)}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-40">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -658,16 +658,16 @@ export default function MembershipPage() {
           {!applicationQuery ? (
             <ApplicationTableSkeleton />
           ) : (
-            <div className="border rounded-lg">
+            <div className="border rounded-lg overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Applicant</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Applied Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Reviewer</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="min-w-[150px]">Applicant</TableHead>
+                    <TableHead className="min-w-[200px]">Email</TableHead>
+                    <TableHead className="min-w-[120px]">Applied Date</TableHead>
+                    <TableHead className="min-w-[100px]">Status</TableHead>
+                    <TableHead className="min-w-[120px]">Reviewer</TableHead>
+                    <TableHead className="text-right min-w-[150px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -710,7 +710,7 @@ export default function MembershipPage() {
                           {application.reviewer?.name || "-"}
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end space-x-2">
+                          <div className="flex justify-end space-x-1">
                             <Button
                               variant="ghost"
                               size="sm"
@@ -726,7 +726,7 @@ export default function MembershipPage() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="text-green-600 border-green-600 hover:bg-green-50"
+                                  className="text-green-600 border-green-600 hover:bg-green-50 hidden sm:flex"
                                   onClick={() => {
                                     setReviewingApplication(application as any);
                                     setReviewForm({ status: "approved", notes: "" });
@@ -739,7 +739,19 @@ export default function MembershipPage() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="text-red-600 border-red-600 hover:bg-red-50"
+                                  className="text-green-600 border-green-600 hover:bg-green-50 sm:hidden"
+                                  onClick={() => {
+                                    setReviewingApplication(application as any);
+                                    setReviewForm({ status: "approved", notes: "" });
+                                    setShowReviewDialog(true);
+                                  }}
+                                >
+                                  <CheckCircle className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-red-600 border-red-600 hover:bg-red-50 hidden sm:flex"
                                   onClick={() => {
                                     setReviewingApplication(application as any);
                                     setReviewForm({ status: "rejected", notes: "" });
@@ -748,6 +760,18 @@ export default function MembershipPage() {
                                 >
                                   <XCircle className="h-4 w-4 mr-1" />
                                   Reject
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-red-600 border-red-600 hover:bg-red-50 sm:hidden"
+                                  onClick={() => {
+                                    setReviewingApplication(application as any);
+                                    setReviewForm({ status: "rejected", notes: "" });
+                                    setShowReviewDialog(true);
+                                  }}
+                                >
+                                  <XCircle className="h-4 w-4" />
                                 </Button>
                               </>
                             )}
@@ -763,20 +787,20 @@ export default function MembershipPage() {
         </TabsContent>
 
         <TabsContent value="members" className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Existing Members</h2>
-            <div className="flex items-center space-x-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h2 className="text-lg sm:text-xl font-semibold">Existing Members</h2>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   placeholder="Search members..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-64"
+                  className="pl-10 w-full sm:w-64"
                 />
               </div>
               <Select value={memberRoleFilter} onValueChange={(value: "member" | "admin" | "superadmin" | "all") => setMemberRoleFilter(value)}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-40">
                   <SelectValue placeholder="Filter by role" />
                 </SelectTrigger>
                 <SelectContent>
@@ -792,17 +816,17 @@ export default function MembershipPage() {
           {!membersQuery ? (
             <MemberTableSkeleton />
           ) : (
-            <div className="border rounded-lg">
+            <div className="border rounded-lg overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Member</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Hub Memberships</TableHead>
-                    <TableHead>Joined Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="min-w-[150px]">Member</TableHead>
+                    <TableHead className="min-w-[200px]">Email</TableHead>
+                    <TableHead className="min-w-[100px]">Role</TableHead>
+                    <TableHead className="min-w-[200px]">Hub Memberships</TableHead>
+                    <TableHead className="min-w-[120px]">Joined Date</TableHead>
+                    <TableHead className="min-w-[100px]">Status</TableHead>
+                    <TableHead className="text-right min-w-[120px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -863,7 +887,7 @@ export default function MembershipPage() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end space-x-2">
+                          <div className="flex justify-end space-x-1">
                             <Button
                               variant="ghost"
                               size="sm"
@@ -1085,7 +1109,7 @@ export default function MembershipPage() {
 
       {/* Bulk Import Dialog */}
       <Dialog open={showBulkImportDialog} onOpenChange={setShowBulkImportDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl mx-4">
           <DialogHeader>
             <DialogTitle>Bulk Import Members</DialogTitle>
             <DialogDescription>
@@ -1228,7 +1252,7 @@ export default function MembershipPage() {
 
       {/* Application Details Dialog */}
       <Dialog open={showApplicationDetailsDialog} onOpenChange={setShowApplicationDetailsDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl mx-4">
           <DialogHeader>
             <DialogTitle>Application Details</DialogTitle>
             <DialogDescription>
@@ -1236,7 +1260,7 @@ export default function MembershipPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {viewingApplication?.applicantName && (
               <div>
                 <Label className="text-sm font-medium">Name</Label>

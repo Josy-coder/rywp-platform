@@ -68,8 +68,8 @@ interface Hub {
   isActive: boolean;
   createdAt: number;
   createdBy: string;
-  image?: string;
-  termsOfReference?: string;
+  image?: string | null; // URL for display
+  termsOfReference?: string | null; // URL for display
   membershipFormFields: any[];
 }
 
@@ -489,7 +489,7 @@ export default function HubsPage() {
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-10 w-32" />
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <HubCardSkeleton key={i} />
           ))}
@@ -540,7 +540,7 @@ export default function HubsPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {filteredHubs.map((hub: Hub) => (
             <Card
               key={hub._id}
@@ -563,7 +563,7 @@ export default function HubsPage() {
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
+                    <DialogContent className="max-w-2xl mx-4">
                       <DialogHeader>
                         <DialogTitle>{hub.name}</DialogTitle>
                       </DialogHeader>
@@ -580,7 +580,7 @@ export default function HubsPage() {
                             {hub.objectives}
                           </p>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <Button
                             variant="outline"
                             onClick={() => {
@@ -592,20 +592,8 @@ export default function HubsPage() {
                                 membershipFormFields: hub.membershipFormFields || [],
                               });
                               setHubFiles({
-                                image: hub.image ? [{
-                                  _id: hub.image,
-                                  name: "Current Image",
-                                  size: 0,
-                                  type: "image/*",
-                                  storageId: hub.image,
-                                }] : [],
-                                termsOfReference: hub.termsOfReference ? [{
-                                  _id: hub.termsOfReference,
-                                  name: "Current Terms of Reference",
-                                  size: 0,
-                                  type: "application/pdf",
-                                  storageId: hub.termsOfReference,
-                                }] : [],
+                                image: [],
+                                termsOfReference: [],
                               });
                               setShowEditDialog(true);
                             }}
@@ -763,7 +751,7 @@ export default function HubsPage() {
 
       
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
           <DialogHeader>
             <DialogTitle>Create New Hub</DialogTitle>
             <DialogDescription>
@@ -772,7 +760,7 @@ export default function HubsPage() {
           </DialogHeader>
 
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
               <TabsTrigger value="basic">Basic Info</TabsTrigger>
               <TabsTrigger value="files">Files</TabsTrigger>
               <TabsTrigger value="form">Membership Form</TabsTrigger>
@@ -862,7 +850,7 @@ export default function HubsPage() {
               <div className="space-y-4">
                 {hubForm.membershipFormFields.map((field, index) => (
                   <Card key={field.id} className="p-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor={`field-label-${index}`}>Field Label</Label>
                         <Input
@@ -998,7 +986,7 @@ export default function HubsPage() {
 
       
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
           <DialogHeader>
             <DialogTitle>Edit Hub</DialogTitle>
             <DialogDescription>
@@ -1007,7 +995,7 @@ export default function HubsPage() {
           </DialogHeader>
 
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
               <TabsTrigger value="basic">Basic Info</TabsTrigger>
               <TabsTrigger value="files">Files</TabsTrigger>
               <TabsTrigger value="form">Membership Form</TabsTrigger>
@@ -1118,7 +1106,7 @@ export default function HubsPage() {
               <div className="space-y-4">
                 {hubForm.membershipFormFields.map((field, index) => (
                   <Card key={field.id} className="p-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor={`edit-field-label-${index}`}>Field Label</Label>
                         <Input

@@ -27,12 +27,20 @@ export const getPartners = query({
       );
     }
 
+    const partnersWithUrls = await Promise.all(
+      partners.map(async (partner) => ({
+        ...partner,
+        logoId: partner.logo,
+        logo: partner.logo ? await ctx.storage.getUrl(partner.logo) : null,
+      }))
+    );
+
     if (paginationOpts) {
       const startIndex = paginationOpts.cursor ? parseInt(paginationOpts.cursor) : 0;
       const endIndex = startIndex + paginationOpts.numItems;
-      const pagePartners = partners.slice(startIndex, endIndex);
+      const pagePartners = partnersWithUrls.slice(startIndex, endIndex);
 
-      const hasMore = endIndex < partners.length;
+      const hasMore = endIndex < partnersWithUrls.length;
       const nextCursor = hasMore ? endIndex.toString() : null;
 
       return {
@@ -42,7 +50,7 @@ export const getPartners = query({
       };
     }
 
-    return { data: partners };
+    return { data: partnersWithUrls };
   },
 });
 
@@ -52,7 +60,13 @@ export const getPartner = query({
     const partner = await ctx.db.get(partnerId);
     if (!partner) return { error: "Partner not found" };
 
-    return { data: partner };
+    return {
+      data: {
+        ...partner,
+        logoId: partner.logo,
+        logo: partner.logo ? await ctx.storage.getUrl(partner.logo) : null,
+      }
+    };
   },
 });
 
