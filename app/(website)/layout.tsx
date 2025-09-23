@@ -1,91 +1,107 @@
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import WebsiteNavbar from "@/components/website-navbar";
+import { Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
 
 export default function WebsiteLayout({
                                         children,
                                       }: {
   children: React.ReactNode;
 }) {
+
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-white shadow-sm border-b">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Image  src="/images/logo.png" alt="logo" width={130} height={50} />
-            </div>
-
-            <div className="hidden md:flex space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-blue-600">Home</Link>
-              <Link href="/about" className="text-gray-700 hover:text-blue-600">About</Link>
-              <Link href="/hubs" className="text-gray-700 hover:text-blue-600">Hubs</Link>
-              <Link href="/projects" className="text-gray-700 hover:text-blue-600">Projects</Link>
-              <Link href="/publications" className="text-gray-700 hover:text-blue-600">Publications</Link>
-              <Link href="/events" className="text-gray-700 hover:text-blue-600">Events</Link>
-              <Link href="/membership" className="text-gray-700 hover:text-blue-600">Membership</Link>
-              <Link href="/partners" className="text-gray-700 hover:text-blue-600">Partners</Link>
-              <Link href="/careers" className="text-gray-700 hover:text-blue-600">Careers</Link>
-              <Link href="/contact" className="text-gray-700 hover:text-blue-600">Contact</Link>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <a
-                href="/signin"
-                className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
-              >
-                Sign In
-              </a>
-            </div>
-          </div>
-        </nav>
-      </header>
-
+      <WebsiteNavbar />
       <main className="flex-grow">
         {children}
       </main>
 
       <footer className="bg-gray-800 text-white">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="lg:col-span-1">
               <h3 className="text-lg font-semibold mb-4">RYWP</h3>
-              <p className="text-gray-300 text-sm">
-                Rwanda Young Water Professionals - Empowering the next generation of water professionals.
+              <p className="text-gray-300 text-sm leading-relaxed">
+                Rwanda Young Water Professionals - Empowering the next generation of water professionals to build sustainable water solutions.
               </p>
+              <div className="mt-6 flex space-x-4">
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <span className="sr-only">Instagram</span>
+                  <Instagram className="h-5 w-5"/>
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <span className="sr-only">LinkedIn</span>
+                  <Linkedin className="h-5 w-5"/>
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <span className="sr-only">Twitter</span>
+                  <Twitter className="h-5 w-5"/>
+                </a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <span className="sr-only">YouTube</span>
+                  <Youtube className="h-5 w-5"/>
+                </a>
+              </div>
             </div>
 
             <div>
               <h4 className="text-md font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="/about" className="text-gray-300 hover:text-white">About Us</a></li>
-                <li><a href="/hubs" className="text-gray-300 hover:text-white">Our Hubs</a></li>
-                <li><a href="/projects" className="text-gray-300 hover:text-white">Projects</a></li>
-                <li><a href="/membership" className="text-gray-300 hover:text-white">Join Us</a></li>
+                <li><Link href="/about#vision-mission" className="text-gray-300 hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/hubs" className="text-gray-300 hover:text-white transition-colors">Our Hubs</Link></li>
+                <li><Link href="/projects" className="text-gray-300 hover:text-white transition-colors">Projects</Link></li>
+                <li><Link href="/membership" className="text-gray-300 hover:text-white transition-colors">Join Us</Link></li>
+                <li><Link href="/events" className="text-gray-300 hover:text-white transition-colors">Events</Link></li>
+                <li><Link href="/careers" className="text-gray-300 hover:text-white transition-colors">Careers</Link></li>
               </ul>
             </div>
 
             <div>
               <h4 className="text-md font-semibold mb-4">Resources</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="/publications" className="text-gray-300 hover:text-white">Publications</a></li>
-                <li><a href="/events" className="text-gray-300 hover:text-white">Events</a></li>
-                <li><a href="/careers" className="text-gray-300 hover:text-white">Careers</a></li>
-                <li><a href="/contact" className="text-gray-300 hover:text-white">Contact</a></li>
+                <li><Link href="/publications#policy-briefs" className="text-gray-300 hover:text-white transition-colors">Publications</Link></li>
+                <li><Link href="/publications#articles" className="text-gray-300 hover:text-white transition-colors">Articles & Blogs</Link></li>
+                <li><Link href="/publications#press-releases" className="text-gray-300 hover:text-white transition-colors">Press Releases</Link></li>
+                <li><Link href="/publications#technical-reports" className="text-gray-300 hover:text-white transition-colors">Technical Reports</Link></li>
+                <li><Link href="/events#media-gallery" className="text-gray-300 hover:text-white transition-colors">Media Gallery</Link></li>
+                <li><Link href="/contact#newsletter" className="text-gray-300 hover:text-white transition-colors">Newsletter</Link></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-md font-semibold mb-4">Legal</h4>
+              <h4 className="text-md font-semibold mb-4">Contact & Legal</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="/privacy" className="text-gray-300 hover:text-white">Privacy Policy</a></li>
-                <li><a href="/terms" className="text-gray-300 hover:text-white">Terms of Service</a></li>
+                <li><Link href="/contact" className="text-gray-300 hover:text-white transition-colors">Contact Us</Link></li>
+                <li><Link href="/partners" className="text-gray-300 hover:text-white transition-colors">Partners</Link></li>
+                <li className="pt-2 border-t border-gray-700">
+                  <Link href="/privacy" className="text-gray-300 hover:text-white transition-colors">Privacy Policy</Link>
+                </li>
+                <li><Link href="/terms" className="text-gray-300 hover:text-white transition-colors">Terms of Service</Link></li>
               </ul>
             </div>
           </div>
 
-          <div className="mt-8 pt-8 border-t border-gray-700 text-center text-sm text-gray-300">
-            <p>&copy; 2025 Rwanda Young Water Professionals. All rights reserved.</p>
+          <div className="mt-12 pt-8 border-t border-gray-700">
+            <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
+              <p className="text-sm text-gray-300 text-center lg:text-left">
+                &copy; 2025 Rwanda Young Water Professionals. All rights reserved.
+              </p>
+
+              <div className="flex flex-wrap justify-center lg:justify-end items-center space-x-6">
+                <span className="text-sm text-gray-400">Supported by our partners:</span>
+                <div className="flex items-center space-x-4 opacity-60">
+                  <div className="w-16 h-8 bg-gray-600 rounded flex items-center justify-center">
+                    <span className="text-xs text-gray-300">Partner</span>
+                  </div>
+                  <div className="w-16 h-8 bg-gray-600 rounded flex items-center justify-center">
+                    <span className="text-xs text-gray-300">Partner</span>
+                  </div>
+                  <div className="w-16 h-8 bg-gray-600 rounded flex items-center justify-center">
+                    <span className="text-xs text-gray-300">Partner</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
