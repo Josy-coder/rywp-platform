@@ -67,71 +67,25 @@ export default function MembershipPage() {
     }
   ];
 
-  const membershipTiers = [
-    {
-      name: "Student Member",
-      price: "Free",
-      duration: "Annual",
-      description: "For undergraduate and graduate students in water-related fields",
-      features: [
-        "Access to student-specific events",
-        "Mentorship program participation",
-        "Discounted workshop fees",
-        "Career guidance resources",
-        "Student project funding opportunities"
-      ],
-      eligibility: "Currently enrolled students in relevant programs",
-      color: "bg-gray-100"
-    },
-    {
-      name: "Professional Member",
-      price: "$50",
-      duration: "Annual",
-      description: "For working professionals in the water sector",
-      features: [
-        "Full access to all events and workshops",
-        "Hub voting rights",
-        "Professional development programs",
-        "Networking platform access",
-        "Priority project opportunities",
-        "Continuing education credits"
-      ],
-      eligibility: "Professionals with water sector experience",
-      color: "bg-light-blue text-white"
-    },
-    {
-      name: "Senior Member",
-      price: "$100",
-      duration: "Annual",
-      description: "For senior professionals and leaders",
-      features: [
-        "All Professional Member benefits",
-        "Strategic planning participation",
-        "Mentorship program leadership",
-        "Speaking opportunities at events",
-        "Policy working group participation",
-        "International conference access"
-      ],
-      eligibility: "5+ years experience in leadership roles",
-      color: "bg-dark-blue text-white"
-    },
-    {
-      name: "Institutional Member",
-      price: "$500",
-      duration: "Annual",
-      description: "For organizations and institutions",
-      features: [
-        "Multiple staff member access",
-        "Partnership development opportunities",
-        "Branded event participation",
-        "Custom training programs",
-        "Research collaboration priority",
-        "Policy influence opportunities"
-      ],
-      eligibility: "Water sector organizations and institutions",
-      color: "bg-gray-800 text-white"
-    }
-  ];
+  const membershipDetails = {
+    name: "RYWP Member",
+    price: "30,000 RWF",
+    duration: "Annual",
+    description: "Join Rwanda's leading network of young water professionals",
+    features: [
+      "Full access to all events and workshops",
+      "Hub participation and voting rights",
+      "Professional development programs",
+      "Networking platform access",
+      "Project collaboration opportunities",
+      "Mentorship program participation",
+      "Technical training sessions",
+      "Career guidance and support",
+      "Research collaboration opportunities",
+      "Policy working group participation"
+    ],
+    eligibility: "Water sector professionals, students, and enthusiasts"
+  };
 
   const applicationSteps = [
     {
@@ -185,7 +139,7 @@ export default function MembershipPage() {
             }`}>
               <h1 className="text-5xl font-light mb-4">Join Our Community</h1>
               <p className="text-xl font-light opacity-90">
-                Become part of Rwanda&#39;s leading network of young water professionals
+                Become part of Rwanda's leading network of young water professionals
               </p>
             </div>
           </div>
@@ -203,10 +157,10 @@ export default function MembershipPage() {
               </div>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
                 RYWP membership connects you with a dynamic community of water professionals
-                committed to transforming Rwanda&#39;s water landscape through innovation, collaboration, and excellence.
+                committed to transforming Rwanda's water landscape through innovation, collaboration, and excellence.
               </p>
               <p className="text-gray-600 text-lg leading-relaxed">
-                Whether you&#39;re just starting your career or are an experienced professional,
+                Whether you're just starting your career or are an experienced professional,
                 RYWP provides the platform, resources, and network to accelerate your impact in the water sector.
               </p>
             </div>
@@ -264,7 +218,7 @@ export default function MembershipPage() {
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                Membership Tiers
+                Membership Details
               </button>
               <button
                 onClick={() => setActiveTab('process')}
@@ -300,43 +254,35 @@ export default function MembershipPage() {
             </div>
           )}
 
-          {/* Membership Tiers Tab */}
+          {/* Membership Details */}
           {activeTab === 'tiers' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {membershipTiers.map((tier, index) => (
-                <div key={index} className={`p-8 ${tier.color}`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-medium">{tier.name}</h3>
-                    <div className="text-right">
-                      <div className="text-2xl font-light">{tier.price}</div>
-                      <div className="text-sm opacity-75">{tier.duration}</div>
-                    </div>
-                  </div>
-
-                  <p className="mb-6 opacity-90">{tier.description}</p>
-
-                  <div className="space-y-3 mb-6">
-                    {tier.features.map((feature, featureIndex) => (
-                      <div key={featureIndex} className="flex items-start">
-                        <div className="w-2 h-2 bg-white rounded-full mt-2 mr-3 flex-shrink-0 opacity-75"></div>
-                        <span className="text-sm opacity-90">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="text-sm opacity-75 mb-6">
-                    <strong>Eligibility:</strong> {tier.eligibility}
-                  </div>
-
-                  <button className={`w-full py-3 text-sm font-medium transition-colors duration-300 ${
-                    tier.color === 'bg-gray-100'
-                      ? 'bg-dark-blue text-white hover:bg-light-blue'
-                      : 'bg-white text-gray-900 hover:bg-gray-100'
-                  }`}>
-                    Choose This Plan
-                  </button>
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-dark-blue text-white p-8">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-light mb-2">{membershipDetails.name}</h3>
+                  <div className="text-3xl font-light mb-2">{membershipDetails.price}</div>
+                  <div className="text-sm opacity-75">{membershipDetails.duration}</div>
                 </div>
-              ))}
+
+                <p className="text-center mb-8 opacity-90">{membershipDetails.description}</p>
+
+                <div className="space-y-3 mb-8">
+                  {membershipDetails.features.map((feature, featureIndex) => (
+                    <div key={featureIndex} className="flex items-start">
+                      <div className="w-2 h-2 bg-white rounded-full mt-2 mr-3 flex-shrink-0 opacity-75"></div>
+                      <span className="text-sm opacity-90">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="text-center text-sm opacity-75 mb-8">
+                  <strong>Open to:</strong> {membershipDetails.eligibility}
+                </div>
+
+                <button className="w-full bg-white text-dark-blue py-3 text-sm font-medium hover:bg-gray-100 transition-colors duration-300">
+                  Apply for Membership
+                </button>
+              </div>
             </div>
           )}
 
@@ -578,7 +524,7 @@ export default function MembershipPage() {
                 <div className="text-sm text-gray-600 space-y-2">
                   <p>By submitting this application, I agree to:</p>
                   <div className="space-y-1 ml-4">
-                    <div>• Abide by RYWP&#39;s code of conduct and professional standards</div>
+                    <div>• Abide by RYWP's code of conduct and professional standards</div>
                     <div>• Actively participate in hub activities and contribute to the community</div>
                     <div>• Pay annual membership fees according to selected tier</div>
                     <div>• Maintain accurate and updated profile information</div>
@@ -617,7 +563,7 @@ export default function MembershipPage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-light text-white mb-4">Ready to Make an Impact?</h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Join hundreds of water professionals working to transform Rwanda&#39;s water future
+            Join hundreds of water professionals working to transform Rwanda's water future
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
