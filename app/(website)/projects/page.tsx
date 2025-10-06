@@ -292,59 +292,22 @@ export default function ProjectsPage() {
                 </div>
 
                 <div className="p-8">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <span className={`px-3 py-1 text-sm text-white ${
-                        project.status === 'ongoing' ? 'bg-light-blue' : 'bg-green-500'
-                      }`}>
-                        {project.status === 'ongoing' ? 'Ongoing' : 'Completed'}
-                      </span>
-                      <span className="text-sm text-gray-600">📍 {project.location}</span>
-                    </div>
+                  <h3 className="text-xl font-medium text-gray-900 mb-4">{project.title}</h3>
+
+                  <div className="mb-4 text-sm text-gray-600">
+                    <span className="font-medium">Duration:</span> {project.duration}
                   </div>
 
-                  <h3 className="text-xl font-medium text-gray-900 mb-3">{project.title}</h3>
-
-                  <div className="grid grid-cols-2 gap-4 mb-4 text-sm text-gray-600">
-                    <div>
-                      <span className="font-medium">Duration:</span> {project.duration}
-                    </div>
-                    <div>
-                      <span className="font-medium">Budget:</span> {project.budget}
-                    </div>
-                    <div>
-                      <span className="font-medium">Lead:</span> {project.lead}
-                    </div>
-                    <div>
-                      <span className="font-medium">Beneficiaries:</span> {project.beneficiaries}
-                    </div>
-                  </div>
-
-                  <p className="text-gray-600 mb-4">{project.description}</p>
-
-
-                  <div className="mb-4">
-                    <h4 className="font-medium text-gray-900 mb-2">
-                      {project.status === 'completed' ? 'Key Outcomes:' : 'Objectives:'}
-                    </h4>
-                    <div className="space-y-1">
-                      {(project.outcomes || project.objectives).slice(0, 3).map((item, index) => (
-                        <div key={index} className="flex items-start">
-                          <div className="w-2 h-2 bg-light-blue rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                          <span className="text-gray-600 text-sm">{item}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <p className="text-gray-600 mb-6">{project.description}</p>
 
                   <div className="flex flex-wrap gap-2 mb-6">
-                    {project.partners.slice(0, 2).map((partner, index) => (
-                      <span key={index} className="bg-gray-100 text-gray-700 px-2 py-1 text-xs">
+                    {project.partners.slice(0, 3).map((partner, index) => (
+                      <span key={index} className="bg-gray-100 text-gray-700 px-3 py-1 text-xs">
                         {partner}
                       </span>
                     ))}
-                    {project.partners.length > 2 && (
-                      <span className="text-gray-500 text-xs">+{project.partners.length - 2} more</span>
+                    {project.partners.length > 3 && (
+                      <span className="bg-gray-100 text-gray-500 px-3 py-1 text-xs">+{project.partners.length - 3} more</span>
                     )}
                   </div>
 

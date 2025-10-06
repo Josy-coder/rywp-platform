@@ -338,7 +338,7 @@ export default function EventsPage() {
 
                       <div className="space-y-3">
                         <Link
-                          href="/register"
+                          href="/events/1/register"
                           className="w-full block text-center bg-dark-blue text-white py-3 hover:bg-light-blue transition-colors duration-300"
                         >
                           Register Now

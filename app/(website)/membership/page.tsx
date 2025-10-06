@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function MembershipPage() {
   const [isVisible, setIsVisible] = useState(false);
@@ -90,23 +90,23 @@ export default function MembershipPage() {
   const applicationSteps = [
     {
       step: 1,
-      title: "Choose Membership Type",
-      description: "Select the membership tier that best fits your profile and career stage"
+      title: "Application",
+      description: "You can apply anytime using the membership form"
     },
     {
       step: 2,
-      title: "Complete Application",
-      description: "Fill out the online application form with your background and motivations"
+      title: "Review",
+      description: "Applications are reviewed twice a year – January & June intakes"
     },
     {
       step: 3,
-      title: "Review Process",
-      description: "Our membership committee reviews your application (typically 5-7 business days)"
+      title: "Notification",
+      description: "Once approved, you'll receive an acceptance email + welcome note"
     },
     {
       step: 4,
-      title: "Welcome & Onboarding",
-      description: "Join your hub community and start participating in RYWP activities"
+      title: "Engagement",
+      description: "After approval, you will be added to our network and invited to activities, workshops, and projects"
     }
   ];
 
@@ -139,7 +139,7 @@ export default function MembershipPage() {
             }`}>
               <h1 className="text-5xl font-light mb-4">Join Our Network</h1>
               <p className="text-xl font-light opacity-90">
-                Become part of Rwanda's leading network of young water professionals
+                Become part of Rwanda&#39;s leading network of young water professionals
               </p>
             </div>
           </div>
@@ -157,10 +157,10 @@ export default function MembershipPage() {
               </div>
               <p className="text-gray-600 text-lg mb-6 leading-relaxed">
                 RYWP membership connects you with a dynamic community of water professionals
-                committed to transforming Rwanda's water landscape through innovation, collaboration, and excellence.
+                committed to transforming Rwanda&#39;s water landscape through innovation, collaboration, and excellence.
               </p>
               <p className="text-gray-600 text-lg leading-relaxed">
-                Whether you're just starting your career or are an experienced professional,
+                Whether you&#39;re just starting your career or are an experienced professional,
                 RYWP provides the platform, resources, and network to accelerate your impact in the water sector.
               </p>
             </div>
@@ -366,145 +366,57 @@ export default function MembershipPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="bg-gray-50 p-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Personal Information */}
+              <div className="space-y-6">
                 <div>
-                  <h3 className="text-xl font-medium text-gray-900 mb-6">Personal Information</h3>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
-                      <input
-                        type="text"
-                        name="firstName"
-                        required
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
-                      <input
-                        type="text"
-                        name="lastName"
-                        required
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
-                      <input
-                        type="email"
-                        name="email"
-                        required
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        required
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
-                      />
-                    </div>
-                  </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    required
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
+                  />
                 </div>
 
-                {/* Professional Information */}
                 <div>
-                  <h3 className="text-xl font-medium text-gray-900 mb-6">Professional Information</h3>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Current Profession/Role *</label>
-                      <input
-                        type="text"
-                        name="profession"
-                        required
-                        value={formData.profession}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Years of Experience</label>
-                      <select
-                        name="experience"
-                        value={formData.experience}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
-                      >
-                        <option value="">Select experience level</option>
-                        <option value="student">Student</option>
-                        <option value="0-2">0-2 years</option>
-                        <option value="3-5">3-5 years</option>
-                        <option value="6-10">6-10 years</option>
-                        <option value="10+">10+ years</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Organization/Institution</label>
-                      <input
-                        type="text"
-                        name="organization"
-                        value={formData.organization}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Location (District/City) *</label>
-                      <input
-                        type="text"
-                        name="location"
-                        required
-                        value={formData.location}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Hub *</label>
-                      <select
-                        name="hub"
-                        required
-                        value={formData.hub}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
-                      >
-                        <option value="">Select your preferred hub</option>
-                        <option value="kigali">Kigali Hub</option>
-                        <option value="eastern">Eastern Hub</option>
-                        <option value="western">Western Hub</option>
-                        <option value="northern">Northern Hub</option>
-                      </select>
-                    </div>
-                  </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
+                  />
                 </div>
-              </div>
 
-              {/* Motivation Statement */}
-              <div className="mt-8">
-                <h3 className="text-xl font-medium text-gray-900 mb-6">Motivation & Goals</h3>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    required
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Institution/Organization (if applicable)</label>
+                  <input
+                    type="text"
+                    name="organization"
+                    value={formData.organization}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Why do you want to join RYWP? What do you hope to contribute and achieve? * (Max 500 words)
+                    Motivation Statement: Why do you want to join RYWP? *
                   </label>
                   <textarea
                     name="motivation"
@@ -513,8 +425,18 @@ export default function MembershipPage() {
                     value={formData.motivation}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
-                    placeholder="Share your motivation for joining RYWP and your professional goals..."
+                    placeholder="Share your motivation for joining RYWP..."
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">CV Upload (Optional)</label>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-dark-blue"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Accepted formats: PDF, DOC, DOCX (Max 5MB)</p>
                 </div>
               </div>
 
@@ -524,7 +446,7 @@ export default function MembershipPage() {
                 <div className="text-sm text-gray-600 space-y-2">
                   <p>By submitting this application, I agree to:</p>
                   <div className="space-y-1 ml-4">
-                    <div>• Abide by RYWP's code of conduct and professional standards</div>
+                    <div>• Abide by RYWP&apos;s code of conduct and professional standards</div>
                     <div>• Actively participate in hub activities and contribute to the community</div>
                     <div>• Pay annual membership fees according to selected tier</div>
                     <div>• Maintain accurate and updated profile information</div>
@@ -563,7 +485,7 @@ export default function MembershipPage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-light text-white mb-4">Ready to Make an Impact?</h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Join hundreds of water professionals working to transform Rwanda's water future
+            Join hundreds of water professionals working to transform Rwanda&#39;s water future
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

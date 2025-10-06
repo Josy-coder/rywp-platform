@@ -104,11 +104,33 @@ export default function HomePage() {
                 <p className="text-gray-600 mb-8 text-lg">
                   Stay informed about our recent projects, partnerships, and impact across Rwanda&#39;s water sector.
                 </p>
+
+                {/* Article Listings */}
+                <div className="space-y-6 mb-8">
+                  <div className="border-l-4 border-dark-blue pl-6">
+                    <div className="text-sm text-gray-500 mb-2">March 15, 2025</div>
+                    <h3 className="font-medium text-gray-900 mb-2">Innovations in Smart Water Metering Across Kigali</h3>
+                    <p className="text-gray-600 text-sm">Exploring how IoT technology is revolutionizing water distribution management in urban areas...</p>
+                  </div>
+
+                  <div className="border-l-4 border-light-blue pl-6">
+                    <div className="text-sm text-gray-500 mb-2">March 10, 2025</div>
+                    <h3 className="font-medium text-gray-900 mb-2">Community-Led Water Solutions in Rural Rwanda</h3>
+                    <p className="text-gray-600 text-sm">Success stories from rural communities taking ownership of their water infrastructure...</p>
+                  </div>
+
+                  <div className="border-l-4 border-lighter-blue pl-6">
+                    <div className="text-sm text-gray-500 mb-2">March 5, 2025</div>
+                    <h3 className="font-medium text-gray-900 mb-2">Climate-Resilient Water Infrastructure for the Future</h3>
+                    <p className="text-gray-600 text-sm">Building adaptive water systems to withstand climate change impacts in East Africa...</p>
+                  </div>
+                </div>
+
                 <Link
-                  href="/news"
+                  href="/publications"
                   className="inline-flex items-center text-dark-blue font-medium hover:text-light-blue transition-colors duration-300"
                 >
-                  Read Updates
+                  View More Articles
                   <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
