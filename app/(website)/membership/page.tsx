@@ -137,7 +137,7 @@ export default function MembershipPage() {
             <div className={`text-white max-w-3xl transition-all duration-700 transform ${
               isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
             }`}>
-              <h1 className="text-5xl font-light mb-4">Join Our Community</h1>
+              <h1 className="text-5xl font-light mb-4">Join Our Network</h1>
               <p className="text-xl font-light opacity-90">
                 Become part of Rwanda's leading network of young water professionals
               </p>
@@ -172,7 +172,7 @@ export default function MembershipPage() {
               </div>
               <div className="text-center p-6 bg-gray-50">
                 <div className="text-3xl font-light text-dark-blue mb-2">4</div>
-                <div className="text-gray-600">Regional Hubs</div>
+                <div className="text-gray-600">Hubs</div>
               </div>
               <div className="text-center p-6 bg-gray-50">
                 <div className="text-3xl font-light text-dark-blue mb-2">50+</div>

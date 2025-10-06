@@ -154,7 +154,7 @@ export default function CareersPage() {
             }`}>
               <h1 className="text-5xl font-light mb-4">Careers & Opportunities</h1>
               <p className="text-xl font-light opacity-90">
-                Join our mission to transform Rwanda&#39;s water landscape through meaningful career opportunities
+                Join our network to transform Rwanda&#39;s water landscape through meaningful career opportunities
               </p>
             </div>
           </div>
@@ -411,54 +411,6 @@ export default function CareersPage() {
               ))}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Application Process */}
-      <section className="py-24 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-light text-gray-900 mb-4">Application Process</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Our streamlined application process ensures fair evaluation of all candidates
-            </p>
-          </div>
-
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-dark-blue mx-auto mb-4 flex items-center justify-center text-white font-bold text-xl rounded-full">
-                  1
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Apply Online</h3>
-                <p className="text-gray-600 text-sm">Submit your application through our online portal with required documents</p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-16 h-16 bg-light-blue mx-auto mb-4 flex items-center justify-center text-white font-bold text-xl rounded-full">
-                  2
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Initial Review</h3>
-                <p className="text-gray-600 text-sm">Our team reviews applications and shortlists qualified candidates</p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-16 h-16 bg-lighter-blue mx-auto mb-4 flex items-center justify-center text-white font-bold text-xl rounded-full">
-                  3
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Interview Process</h3>
-                <p className="text-gray-600 text-sm">Selected candidates participate in interviews and assessments</p>
-              </div>
-
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gray-700 mx-auto mb-4 flex items-center justify-center text-white font-bold text-xl rounded-full">
-                  4
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Final Selection</h3>
-                <p className="text-gray-600 text-sm">Successful candidates receive offers and join our team</p>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 

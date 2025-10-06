@@ -211,41 +211,6 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                {/* Quick Contacts */}
-                <div>
-                  <h3 className="text-xl font-medium text-gray-900 mb-4">Quick Contacts</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-gray-50">
-                      <div>
-                        <p className="font-medium text-gray-900">Membership</p>
-                        <p className="text-sm text-gray-600">Join our network</p>
-                      </div>
-                      <Link href="mailto:membership@rywp.rw" className="text-dark-blue hover:text-light-blue">
-                        membership@rywp.rw
-                      </Link>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-gray-50">
-                      <div>
-                        <p className="font-medium text-gray-900">Partnerships</p>
-                        <p className="text-sm text-gray-600">Collaborate with us</p>
-                      </div>
-                      <Link href="mailto:partnerships@rywp.rw" className="text-dark-blue hover:text-light-blue">
-                        partnerships@rywp.rw
-                      </Link>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-gray-50">
-                      <div>
-                        <p className="font-medium text-gray-900">Media</p>
-                        <p className="text-sm text-gray-600">Press inquiries</p>
-                      </div>
-                      <Link href="mailto:media@rywp.rw" className="text-dark-blue hover:text-light-blue">
-                        media@rywp.rw
-                      </Link>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

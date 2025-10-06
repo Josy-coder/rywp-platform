@@ -253,24 +253,6 @@ export default function PublicationsPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div className="text-center p-6 bg-gray-50">
-                <div className="text-3xl font-light text-dark-blue mb-2">25+</div>
-                <div className="text-gray-600">Publications</div>
-              </div>
-              <div className="text-center p-6 bg-gray-50">
-                <div className="text-3xl font-light text-dark-blue mb-2">15K+</div>
-                <div className="text-gray-600">Downloads</div>
-              </div>
-              <div className="text-center p-6 bg-gray-50">
-                <div className="text-3xl font-light text-dark-blue mb-2">12</div>
-                <div className="text-gray-600">Research Projects</div>
-              </div>
-              <div className="text-center p-6 bg-gray-50">
-                <div className="text-3xl font-light text-dark-blue mb-2">8</div>
-                <div className="text-gray-600">Partner Institutions</div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -519,70 +501,15 @@ export default function PublicationsPage() {
         </div>
       </section>
 
-      {/* Research Collaboration */}
-      <section className="py-24 bg-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-light text-gray-900 mb-8">Research Collaboration</h2>
-          <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
-            Partner with us on research initiatives and contribute to Rwanda&#39;s water knowledge base
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-dark-blue mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Collaborative Research</h3>
-              <p className="text-gray-600 text-sm">Partner with us on joint research initiatives and policy analysis</p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-light-blue mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Guest Publications</h3>
-              <p className="text-gray-600 text-sm">Submit articles and research findings for our publication series</p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-lighter-blue mx-auto mb-4 flex items-center justify-center">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Data Sharing</h3>
-              <p className="text-gray-600 text-sm">Access and contribute to our water sector data repository</p>
-            </div>
-
-            <Link
-              href="/contact"
-              className="inline-block bg-dark-blue text-white px-8 py-3 hover:bg-light-blue transition-colors duration-300"
-            >
-              Explore Research Partnership
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Call to Action */}
       <section className="py-24 bg-gray-900">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-light text-white mb-4">Stay Informed</h2>
+          <h2 className="text-4xl font-light text-white mb-4">Have Some Findings</h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Subscribe to receive notifications about new publications and research findings
+            Contact us regarding new publications and research findings
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/newsletter"
-              className="bg-light-blue text-white px-8 py-3 hover:bg-dark-blue transition-colors duration-300"
-            >
-              Subscribe to Newsletter
-            </Link>
             <Link
               href="/contact"
               className="border border-light-blue text-light-blue px-8 py-3 hover:bg-light-blue hover:text-white transition-all duration-300"

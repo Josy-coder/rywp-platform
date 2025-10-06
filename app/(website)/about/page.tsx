@@ -275,7 +275,7 @@ export default function AboutPage() {
       {/* Call to Action */}
       <section className="py-24 bg-gray-900">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl font-light text-white mb-4">Join Our Mission</h2>
+          <h2 className="text-4xl font-light text-white mb-4">Join Our Network</h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
             Be part of Rwanda&#39;s water transformation. Connect with passionate professionals and make a lasting impact.
           </p>

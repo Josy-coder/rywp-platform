@@ -398,42 +398,6 @@ export default function EventsPage() {
         </div>
       </section>
 
-      {/* Knowledge Sharing Sessions */}
-      <section id="knowledge-sharing" className="py-24 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <div className="flex items-center mb-6">
-                <div className="w-1 h-12 bg-light-blue mr-4"></div>
-                <h2 className="text-3xl font-light text-gray-900">Knowledge Sharing Sessions</h2>
-              </div>
-              <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-                Our regular knowledge sharing initiatives provide continuous learning opportunities
-                for water professionals at all career stages.
-              </p>
-
-              <div className="space-y-6">
-                {knowledgeSharingSessions.map((session, index) => (
-                  <div key={index} className="border-l-4 border-dark-blue pl-6">
-                    <h3 className="font-medium text-gray-900 mb-2">{session.title}</h3>
-                    <div className="text-sm text-gray-600 mb-2">
-                      <span className="font-medium">{session.schedule}</span> • {session.time} • {session.format}
-                    </div>
-                    <p className="text-gray-600 text-sm">{session.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="bg-gray-300 h-96 flex items-center justify-center">
-                <span className="text-gray-600 text-xl">Knowledge Sharing Image</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Media Gallery */}
       <section id="media-gallery" className="py-24 bg-gray-50">
         <div className="container mx-auto px-4">

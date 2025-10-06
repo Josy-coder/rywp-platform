@@ -278,14 +278,6 @@ export default function WebsiteNavbar() {
               </Link>
 
               <Link
-                href="/partners"
-                className="nav-item px-3 py-2 text-sm font-bold text-gray-700 hover:text-dark-blue hover:bg-gray-50 rounded-md transition-colors"
-                onClick={closeDropdown}
-              >
-                Partners
-              </Link>
-
-              <Link
                 href="/careers"
                 className="nav-item px-3 py-2 text-sm font-bold text-gray-700 hover:text-dark-blue hover:bg-gray-50 rounded-md transition-colors"
                 onClick={closeDropdown}

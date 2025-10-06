@@ -70,7 +70,7 @@ export default function HomePage() {
                 href="/membership"
                 className="inline-block bg-light-blue text-white px-8 py-3 text-lg font-medium hover:bg-dark-blue transition-colors duration-300"
               >
-                Join Our Mission
+                Join Our Network
               </Link>
             </div>
           </div>
@@ -142,7 +142,7 @@ export default function HomePage() {
       <section className="py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-light text-gray-900 mb-4">Knowledge Hub</h2>
+            <h2 className="text-4xl font-light text-gray-900 mb-4">Publications</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Research, insights, and technical expertise from our community
             </p>
@@ -198,7 +198,7 @@ export default function HomePage() {
             <div>
               <div className="flex items-center mb-6">
                 <div className="w-1 h-12 bg-light-blue mr-4"></div>
-                <h2 className="text-3xl font-light text-gray-900">Project Highlights</h2>
+                <h2 className="text-3xl font-light text-gray-900">Focus Areas</h2>
               </div>
               <p className="text-gray-600 text-lg mb-8">
                 Discover how we&#39;re transforming communities through innovative water solutions,
@@ -237,52 +237,30 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Newsletter & Contact Split */}
-      <section className="py-24 bg-gray-900">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            {/* Newsletter */}
-            <div>
-              <h2 className="text-3xl font-light text-white mb-4">Stay Informed</h2>
-              <p className="text-gray-300 mb-8 text-lg">
-                Monthly updates on our projects, opportunities, and water sector insights.
-              </p>
+      {/* Newsletter Signup */}
+      <section id="newsletter" className="py-24 bg-gray-900">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-4xl font-light text-white mb-4">Stay Connected</h2>
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            Subscribe to our newsletter for monthly updates on projects, events, and opportunities in Rwanda&#39;s water sector
+          </p>
 
-              <div className="flex">
-                <input
-                  type="email"
-                  placeholder="Your email address"
-                  className="flex-1 px-4 py-3 bg-gray-800 text-white placeholder-gray-400 border border-gray-700 focus:outline-none focus:border-light-blue"
-                />
-                <button className="bg-light-blue text-white px-6 py-3 hover:bg-dark-blue transition-colors duration-300">
-                  Subscribe
-                </button>
-              </div>
-            </div>
-
-            {/* Contact CTA */}
-            <div>
-              <h2 className="text-3xl font-light text-white mb-4">Ready to Collaborate?</h2>
-              <p className="text-gray-300 mb-8 text-lg">
-                Connect with our team to discuss partnerships, projects, or membership opportunities.
-              </p>
-
-              <div className="space-y-4">
-                <Link
-                  href="/contact"
-                  className="block bg-transparent border border-light-blue text-light-blue px-8 py-3 text-center hover:bg-light-blue hover:text-white transition-all duration-300"
-                >
-                  Get in Touch
-                </Link>
-                <Link
-                  href="/membership"
-                  className="block bg-light-blue text-white px-8 py-3 text-center hover:bg-dark-blue transition-colors duration-300"
-                >
-                  Join Our Network
-                </Link>
-              </div>
+          <div className="max-w-md mx-auto mb-8">
+            <div className="flex">
+              <input
+                type="email"
+                placeholder="Your email address"
+                className="flex-1 px-4 py-3 bg-gray-800 text-white placeholder-gray-400 border border-gray-700 focus:outline-none focus:border-light-blue"
+              />
+              <button className="bg-light-blue text-white px-6 py-3 hover:bg-dark-blue transition-colors duration-300">
+                Subscribe
+              </button>
             </div>
           </div>
+
+          <p className="text-sm text-gray-400">
+            We respect your privacy and will never share your information. Unsubscribe at any time.
+          </p>
         </div>
       </section>
     </div>
