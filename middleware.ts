@@ -77,18 +77,17 @@ const isPublicRoute = createRouteMatcher([
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // In production, redirect all traffic to coming soon page (except the coming soon page itself)
-  // In test mode, allow full website access for preview deployments
-  const isProduction = process.env.NODE_ENV === "production";
-  const isTest = process.env.NODE_ENV === "test";
 
-  if (isProduction && !isTest && !isComingSoonPage(request)) {
+  // Set NEXT_PUBLIC_COMING_SOON=true to enable the coming soon page
+  // Set NEXT_PUBLIC_COMING_SOON=false (or leave unset) to show the full website
+  const comingSoonEnabled = process.env.NEXT_PUBLIC_COMING_SOON === "true";
+
+  if (comingSoonEnabled && !isComingSoonPage(request)) {
     return NextResponse.redirect(new URL("/coming-soon", request.url));
   }
 
-  // In development or test mode, allow normal access - skip coming soon redirect
-  if ((!isProduction || isTest) && isComingSoonPage(request)) {
-    // Allow access to coming soon page in dev/test for testing
+  // If coming soon is disabled and user visits /coming-soon, allow it (for testing)
+  if (!comingSoonEnabled && isComingSoonPage(request)) {
     return NextResponse.next();
   }
 
