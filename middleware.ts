@@ -78,14 +78,17 @@ export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // In production, redirect all traffic to coming soon page (except the coming soon page itself)
+  // In preview mode, allow full website access
   const isProduction = process.env.NODE_ENV === "production";
-  if (isProduction && !isComingSoonPage(request)) {
+  const isPreview = process.env.NODE_ENV === "preview";
+
+  if (isProduction && !isPreview && !isComingSoonPage(request)) {
     return NextResponse.redirect(new URL("/coming-soon", request.url));
   }
 
-  // In development, allow normal access - skip coming soon redirect
-  if (!isProduction && isComingSoonPage(request)) {
-    // Allow access to coming soon page in dev for testing
+  // In development or preview, allow normal access - skip coming soon redirect
+  if ((!isProduction || isPreview) && isComingSoonPage(request)) {
+    // Allow access to coming soon page in dev/preview for testing
     return NextResponse.next();
   }
 
